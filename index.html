@@ -78,9 +78,11 @@
 
     // ========== CONFIGURATION ==========
     const CONFIG = {
-      REFRESH_RATE: 60000, // 60s - respectful of API rate limits
+      REFRESH_RATE: 120000, // 120s - avoid CoinGecko rate limits
       FNG_API: 'https://api.alternative.me/fng/',
       COINGECKO_API: 'https://api.coingecko.com/api/v3',
+      CACHE_KEY: 'csp_cache_v2',
+      CACHE_TTL: 300000, // 5 min cache validity
     };
 
     // ========== CLASSIFICATIONS ==========
@@ -107,8 +109,24 @@
       return { color: '#16c784', label: 'V.BULLISH' };
     };
 
+    // ========== CACHE HELPER ==========
+    const saveCache = (key, data) => {
+      try {
+        localStorage.setItem(CONFIG.CACHE_KEY + '_' + key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (e) { console.warn('Cache save failed:', e); }
+    };
+    const loadCache = (key) => {
+      try {
+        const raw = localStorage.getItem(CONFIG.CACHE_KEY + '_' + key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        // Return cached data even if stale (better than nothing)
+        return parsed.data;
+      } catch (e) { return null; }
+    };
+
     // ========== RETRY HELPER ==========
-    const fetchWithRetry = async (fetchFn, retries = 3, delay = 2000) => {
+    const fetchWithRetry = async (fetchFn, retries = 2, delay = 3000) => {
       for (let attempt = 1; attempt <= retries; attempt++) {
         const result = await fetchFn();
         if (result !== null) return result;
@@ -119,6 +137,9 @@
       }
       return null;
     };
+
+    // Small delay helper to stagger API calls and avoid rate limits
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
     // ========== REAL API FETCHERS ==========
 
@@ -134,6 +155,7 @@
           classification: d.value_classification,
           date: new Date(parseInt(d.timestamp) * 1000).toISOString().split('T')[0]
         }));
+        saveCache('fg', data);
         return data;
       } catch (err) {
         console.error('Fear & Greed fetch error:', err);
@@ -147,29 +169,24 @@
         const res = await fetch(`${CONFIG.COINGECKO_API}/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`);
         if (!res.ok) throw new Error(`CoinGecko BTC history error: ${res.status}`);
         const json = await res.json();
-        return json.prices.map(([ts, price]) => ({ ts: Math.floor(ts / 1000), price }));
+        const data = json.prices.map(([ts, price]) => ({ ts: Math.floor(ts / 1000), price }));
+        saveCache('btc', data);
+        return data;
       } catch (err) {
         console.error('BTC history fetch error:', err);
         return null;
       }
     };
 
-    // Fetch Top 100+ cryptos from CoinGecko (2 pages)
+    // Fetch Top 100 cryptos from CoinGecko (single page to reduce API calls)
     const fetchCryptos = async () => {
       try {
-        const baseUrl = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
-        const [res1, res2] = await Promise.all([
-          fetch(`${baseUrl}&page=1`),
-          fetch(`${baseUrl}&page=2`).catch(() => null),
-        ]);
-        if (!res1.ok) throw new Error(`CoinGecko markets error: ${res1.status}`);
-        const page1 = await res1.json();
-        let page2 = [];
-        if (res2 && res2.ok) {
-          page2 = await res2.json();
-        }
-        const all = [...page1, ...page2];
-        return all.map((coin, i) => ({
+        const url = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`CoinGecko markets error: ${res.status}`);
+        const coins = await res.json();
+        if (!Array.isArray(coins)) throw new Error('Invalid response format');
+        const data = coins.map((coin, i) => ({
           id: i + 1,
           cgId: coin.id,
           sym: coin.symbol.toUpperCase(),
@@ -189,6 +206,8 @@
           totalSupply: coin.total_supply || 0,
           lastUpdated: coin.last_updated,
         }));
+        saveCache('cryptos', data);
+        return data;
       } catch (err) {
         console.error('Crypto fetch error:', err);
         return null;
@@ -1034,33 +1053,52 @@
         };
       }, [cryptos]);
 
-      // Fetch all data
+      // Load cached data immediately on mount
+      useEffect(() => {
+        const cachedFg = loadCache('fg');
+        const cachedBtc = loadCache('btc');
+        const cachedCryptos = loadCache('cryptos');
+        if (cachedFg) setFgHist(cachedFg);
+        if (cachedBtc) setBtcHist(cachedBtc);
+        if (cachedCryptos) setCryptos(cachedCryptos);
+        if (cachedFg || cachedCryptos) {
+          setLoading(false);
+          setLastUpdate('cache');
+        }
+      }, []);
+
+      // Fetch all data — stagger CoinGecko calls to avoid rate limit
       const loadAllData = useCallback(async () => {
         const newErrors = [];
 
-        // Fetch all 3 APIs in parallel with auto-retry
-        const [fgData, btcData, top50Data] = await Promise.all([
-          fetchWithRetry(fetchFearGreedData),
-          fetchWithRetry(() => fetchBtcHistory(730)),
-          fetchWithRetry(fetchCryptos),
-        ]);
-
+        // 1. Fetch Fear & Greed (different API, no rate limit issue)
+        const fgData = await fetchWithRetry(fetchFearGreedData);
         if (fgData) {
           setFgHist(fgData);
-        } else {
+        } else if (!loadCache('fg')) {
           newErrors.push('Fear & Greed Index indisponible');
         }
 
-        if (btcData) {
-          setBtcHist(btcData);
-        } else {
-          newErrors.push('Historique BTC indisponible');
+        // 2. Wait before hitting CoinGecko
+        await wait(1500);
+
+        // 3. Fetch cryptos from CoinGecko
+        const cryptoData = await fetchWithRetry(fetchCryptos);
+        if (cryptoData) {
+          setCryptos(cryptoData);
+        } else if (!loadCache('cryptos')) {
+          newErrors.push('Données marché indisponibles — CoinGecko rate limited');
         }
 
-        if (top50Data) {
-          setCryptos(top50Data);
-        } else {
-          newErrors.push('Données marché indisponibles');
+        // 4. Wait again before second CoinGecko call
+        await wait(2000);
+
+        // 5. Fetch BTC history from CoinGecko
+        const btcData = await fetchWithRetry(() => fetchBtcHistory(730));
+        if (btcData) {
+          setBtcHist(btcData);
+        } else if (!loadCache('btc')) {
+          newErrors.push('Historique BTC indisponible');
         }
 
         setErrors(newErrors);
@@ -1068,18 +1106,21 @@
         setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
 
         // Run backtest optimization (only on first load or if not yet done)
-        if (fgData && btcData) {
-          const opt = runBacktestOptimization(fgData, btcData);
+        const finalFg = fgData || loadCache('fg');
+        const finalBtc = btcData || loadCache('btc');
+        if (finalFg && finalBtc) {
+          const opt = runBacktestOptimization(finalFg, finalBtc);
           setOptResult(opt);
-          console.log(`Optimization complete: ${opt.tested} combos tested, best correlation: ${opt.correlation}, weights: [${opt.weights}]`);
+          console.log(`Optimization: ${opt.tested} combos, r=${opt.correlation}, weights=[${opt.weights}]`);
         }
 
         // Save current opp score as previous for next refresh
-        if (top50Data && fgData) {
-          const currentFg = fgData[fgData.length - 1]?.value || 0;
-          const btc = top50Data.find(c => c.sym === 'BTC');
+        const finalCryptos = cryptoData || loadCache('cryptos');
+        if (finalCryptos && finalFg) {
+          const currentFg = finalFg[finalFg.length - 1]?.value || 0;
+          const btc = finalCryptos.find(c => c.sym === 'BTC');
           const ow = optResult?.weights || null;
-          const opp = computeOpportunityIndex(currentFg, top50Data, btc?.price || 0, btc?.ath || 0, ow);
+          const opp = computeOpportunityIndex(currentFg, finalCryptos, btc?.price || 0, btc?.ath || 0, ow);
           setPrevOppScore(prev => prev === null ? opp.score : prev);
         }
       }, []);
@@ -1112,7 +1153,7 @@
         });
       }, [cryptos, search, filter, sort]);
 
-      const isLive = !loading && errors.length === 0;
+      const isLive = !loading && errors.length === 0 && lastUpdate !== 'cache';
 
       return (
         <div className="min-h-screen bg-dark-900 text-white noise-bg bg-grid">
@@ -1144,7 +1185,7 @@
                   </span>
                   <span className="text-gray-600 flex items-center gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Cliquez pour les détails • Actualisation toutes les 60s
+                    Cliquez pour les détails • Actualisation toutes les 2 min
                   </span>
                 </div>
 
