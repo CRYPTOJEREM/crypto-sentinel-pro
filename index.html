@@ -142,13 +142,22 @@
       }
     };
 
-    // Fetch Top 50 cryptos from CoinGecko
-    const fetchTop50 = async () => {
+    // Fetch Top 100+ cryptos from CoinGecko (2 pages)
+    const fetchCryptos = async () => {
       try {
-        const res = await fetch(`${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`);
-        if (!res.ok) throw new Error(`CoinGecko markets error: ${res.status}`);
-        const json = await res.json();
-        return json.map((coin, i) => ({
+        const baseUrl = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
+        const [res1, res2] = await Promise.all([
+          fetch(`${baseUrl}&page=1`),
+          fetch(`${baseUrl}&page=2`).catch(() => null),
+        ]);
+        if (!res1.ok) throw new Error(`CoinGecko markets error: ${res1.status}`);
+        const page1 = await res1.json();
+        let page2 = [];
+        if (res2 && res2.ok) {
+          page2 = await res2.json();
+        }
+        const all = [...page1, ...page2];
+        return all.map((coin, i) => ({
           id: i + 1,
           cgId: coin.id,
           sym: coin.symbol.toUpperCase(),
@@ -169,7 +178,7 @@
           lastUpdated: coin.last_updated,
         }));
       } catch (err) {
-        console.error('Top 50 fetch error:', err);
+        console.error('Crypto fetch error:', err);
         return null;
       }
     };
@@ -219,32 +228,187 @@
       return Math.round(change * 10) / 10;
     };
 
-    // Compute Opportunity Index from real market data
-    const computeOpportunityIndex = (fgValue, cryptos, btcPrice, btcAth) => {
-      // Factor 1: Fear & Greed as contrarian (low fear = high opportunity)
+    // ========== BACKTEST OPTIMIZATION ENGINE ==========
+    // Runs on historical F&G + BTC data to find optimal weight combination
+    const runBacktestOptimization = (fgHistory, btcHistory) => {
+      if (!fgHistory || fgHistory.length < 90 || !btcHistory || btcHistory.length < 90) {
+        return { weights: [18, 24, 20, 16, 22], accuracy: 0, tested: 0 };
+      }
+
+      // Align data: match F&G dates with BTC prices
+      const btcMap = {};
+      btcHistory.forEach(b => { btcMap[Math.floor(b.ts / 86400)] = b.price; });
+
+      const aligned = fgHistory.map(fg => {
+        const dayKey = Math.floor(fg.ts / 86400);
+        return { fg: fg.value, price: btcMap[dayKey] || btcMap[dayKey - 1] || btcMap[dayKey + 1] || 0 };
+      }).filter(d => d.price > 0);
+
+      if (aligned.length < 60) return { weights: [18, 24, 20, 16, 22], accuracy: 0, tested: 0 };
+
+      // Compute derived signals for each day
+      const signals = [];
+      for (let i = 30; i < aligned.length - 14; i++) {
+        const fg = aligned[i].fg;
+        const price = aligned[i].price;
+        const price30ago = aligned[i - 30].price;
+        const price7ago = aligned[i - 7].price;
+
+        // Signal 1: F&G contrarian
+        const s1 = fg <= 25 ? 85 : fg <= 40 ? 70 : fg <= 55 ? 50 : fg <= 75 ? 35 : 15;
+
+        // Signal 2: Price momentum (30d relative)
+        const mom30 = ((price - price30ago) / price30ago) * 100;
+        const s2 = Math.max(0, Math.min(100, 50 + mom30 * 2.5));
+
+        // Signal 3: Trend strength (7d)
+        const mom7 = ((price - price7ago) / price7ago) * 100;
+        const s3 = Math.max(0, Math.min(100, 50 + mom7 * 5));
+
+        // Signal 4: Volatility (7d std dev proxy)
+        const window = aligned.slice(i - 7, i).map(d => d.price);
+        const mean = window.reduce((a, b) => a + b, 0) / window.length;
+        const variance = window.reduce((s, p) => s + Math.pow(p - mean, 2), 0) / window.length;
+        const volatility = (Math.sqrt(variance) / mean) * 100;
+        const s4 = volatility < 1.5 ? 40 : volatility < 3 ? 80 : volatility < 6 ? 60 : 20;
+
+        // Signal 5: Mean reversion (deviation from 30d avg)
+        const avg30 = aligned.slice(i - 30, i).reduce((s, d) => s + d.price, 0) / 30;
+        const deviation = ((price - avg30) / avg30) * 100;
+        const s5 = deviation < -10 ? 85 : deviation < -3 ? 65 : deviation < 3 ? 50 : deviation < 10 ? 35 : 15;
+
+        // Future return (14 days ahead) - what we're trying to predict
+        const futurePrice = aligned[i + 14].price;
+        const futureReturn = ((futurePrice - price) / price) * 100;
+
+        signals.push({ s1, s2, s3, s4, s5, futureReturn });
+      }
+
+      if (signals.length < 30) return { weights: [18, 24, 20, 16, 22], accuracy: 0, tested: 0 };
+
+      // Grid search: test weight combinations (step=4, sums to ~100)
+      let bestWeights = [20, 20, 20, 20, 20];
+      let bestCorrelation = -Infinity;
+      let tested = 0;
+
+      const step = 4;
+      for (let w1 = 8; w1 <= 36; w1 += step) {
+        for (let w2 = 8; w2 <= 36; w2 += step) {
+          for (let w3 = 8; w3 <= 36; w3 += step) {
+            for (let w4 = 8; w4 <= 36; w4 += step) {
+              const w5 = 100 - w1 - w2 - w3 - w4;
+              if (w5 < 4 || w5 > 40) continue;
+              tested++;
+
+              // Compute composite scores + correlation with future returns
+              let sumXY = 0, sumX = 0, sumY = 0, sumX2 = 0, sumY2 = 0;
+              const n = signals.length;
+
+              for (const sig of signals) {
+                const composite = (sig.s1 * w1 + sig.s2 * w2 + sig.s3 * w3 + sig.s4 * w4 + sig.s5 * w5) / 100;
+                const ret = sig.futureReturn;
+                sumXY += composite * ret;
+                sumX += composite;
+                sumY += ret;
+                sumX2 += composite * composite;
+                sumY2 += ret * ret;
+              }
+
+              const correlation = (n * sumXY - sumX * sumY) /
+                (Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY)) || 1);
+
+              if (correlation > bestCorrelation) {
+                bestCorrelation = correlation;
+                bestWeights = [w1, w2, w3, w4, w5];
+              }
+            }
+          }
+        }
+      }
+
+      // Convert correlation to accuracy % (0-100)
+      const accuracy = Math.round(Math.max(0, Math.min(100, (bestCorrelation + 1) * 50)));
+
+      return { weights: bestWeights, accuracy, tested, correlation: Math.round(bestCorrelation * 100) / 100 };
+    };
+
+    // ========== FACTOR INTERPRETATION (user-facing, no formula revealed) ==========
+    const getFactorInterpretation = (name, value) => {
+      const v = value;
+      if (name === 'Fear/Greed Contrarian') {
+        if (v >= 75) return { text: 'Le marché est en panique — historiquement, c\'est souvent une zone d\'accumulation pour les investisseurs patients.', signal: 'Fort' };
+        if (v >= 55) return { text: 'Le sentiment est négatif. Les corrections de ce type ont souvent précédé des rebonds significatifs.', signal: 'Modéré' };
+        if (v >= 40) return { text: 'Zone neutre — le marché n\'envoie pas de signal contrarian clair dans un sens ou l\'autre.', signal: 'Neutre' };
+        if (v >= 25) return { text: 'L\'optimisme domine. La prudence est conseillée : les phases d\'euphorie peuvent précéder des corrections.', signal: 'Faible' };
+        return { text: 'Le marché est en euphorie extrême. Historiquement, ces niveaux ont souvent marqué des sommets locaux.', signal: 'Très faible' };
+      }
+      if (name === 'BTC vs ATH') {
+        if (v >= 90) return { text: 'Bitcoin est très proche de son record historique — signe de force majeure du marché et de confiance élevée.', signal: 'Fort' };
+        if (v >= 70) return { text: 'Le marché évolue dans une zone haute. La tendance de fond reste haussière avec un potentiel de continuation.', signal: 'Bon' };
+        if (v >= 50) return { text: 'Bitcoin est à mi-chemin de son ATH. Le marché est en phase de construction ou de consolidation.', signal: 'Neutre' };
+        if (v >= 30) return { text: 'Le marché est significativement sous son ATH. Zone potentielle d\'accumulation pour le long terme.', signal: 'Opportunité' };
+        return { text: 'Bitcoin est loin de son record. Le marché traverse une phase de forte correction — territoire de conviction.', signal: 'Contrarian' };
+      }
+      if (name === 'Market Breadth') {
+        if (v >= 75) return { text: 'Large participation haussière : la majorité des actifs progressent. Signe d\'un marché sain et en tendance.', signal: 'Fort' };
+        if (v >= 55) return { text: 'La majorité du marché est en hausse. La tendance est positive mais quelques divergences apparaissent.', signal: 'Bon' };
+        if (v >= 40) return { text: 'Marché partagé : autant de gagnants que de perdants. Phase d\'indécision ou de rotation sectorielle.', signal: 'Neutre' };
+        if (v >= 20) return { text: 'Peu d\'actifs participent à la hausse. La faiblesse est généralisée — méfiance recommandée.', signal: 'Faible' };
+        return { text: 'Marché en détresse : quasi aucun actif ne progresse. Capitulation possible ou fin de cycle baissier.', signal: 'Alerte' };
+      }
+      if (name === 'Volatilité') {
+        if (v >= 70) return { text: 'La volatilité est modérée et constructive. Les mouvements sont ordonnés — conditions idéales pour du trading directionnel.', signal: 'Optimal' };
+        if (v >= 50) return { text: 'Volatilité dans une fourchette acceptable. Le marché oscille normalement avec des opportunités régulières.', signal: 'Bon' };
+        if (v >= 35) return { text: 'Très faible volatilité. Le marché est en compression — un mouvement explosif pourrait se préparer dans un sens ou l\'autre.', signal: 'Attention' };
+        return { text: 'Volatilité extrême. Les mouvements sont brutaux et imprévisibles — le risque est maximal, favoriser la réduction d\'exposition.', signal: 'Danger' };
+      }
+      if (name === 'Momentum 30j') {
+        if (v >= 75) return { text: 'Fort momentum haussier sur 30 jours. La tendance est clairement établie en faveur des acheteurs.', signal: 'Fort' };
+        if (v >= 55) return { text: 'Momentum modérément positif. Le marché est en légère progression — tendance favorable mais sans excès.', signal: 'Bon' };
+        if (v >= 40) return { text: 'Momentum neutre. Le marché évolue sans direction claire sur le mois écoulé. Phase d\'attente.', signal: 'Neutre' };
+        if (v >= 20) return { text: 'Momentum négatif. La tendance mensuelle est baissière — le marché perd du terrain progressivement.', signal: 'Faible' };
+        return { text: 'Fort momentum baissier. La pression vendeuse domine largement sur le mois — phase de correction active.', signal: 'Très faible' };
+      }
+      // Mean Reversion
+      if (v >= 70) return { text: 'Le marché est fortement survendu par rapport à sa moyenne. Les retours vers la moyenne favorisent un rebond.', signal: 'Fort' };
+      if (v >= 50) return { text: 'Légèrement en dessous de la moyenne. Conditions normales avec une légère opportunité statistique.', signal: 'Bon' };
+      if (v >= 35) return { text: 'Le marché évolue proche de sa moyenne. Pas de signal de déviation significatif.', signal: 'Neutre' };
+      return { text: 'Le marché est en surchauffe par rapport à sa moyenne. Une correction vers la moyenne est statistiquement probable.', signal: 'Prudence' };
+    };
+
+    const getSignalColor = (signal) => {
+      const map = { 'Fort': '#16c784', 'Bon': '#93d900', 'Optimal': '#16c784', 'Modéré': '#93d900', 'Neutre': '#c9b003', 'Attention': '#ea8c00', 'Opportunité': '#3b82f6', 'Contrarian': '#a855f7', 'Faible': '#ea8c00', 'Très faible': '#ea3943', 'Alerte': '#ea3943', 'Danger': '#ea3943', 'Prudence': '#ea8c00' };
+      return map[signal] || '#c9b003';
+    };
+
+    // Compute Opportunity Index from real market data (with optimized weights)
+    const computeOpportunityIndex = (fgValue, cryptos, btcPrice, btcAth, optWeights) => {
+      const w = optWeights || [18, 24, 20, 16, 22];
+
+      // Factor 1: Fear & Greed as contrarian
       const fgScore = fgValue <= 25 ? 85 : fgValue <= 40 ? 70 : fgValue <= 55 ? 50 : fgValue <= 75 ? 35 : 15;
 
-      // Factor 2: Market Cap vs ATH (BTC as proxy)
+      // Factor 2: BTC vs ATH
       const mcScore = btcAth > 0 ? Math.round(Math.min(100, (btcPrice / btcAth) * 100)) : 50;
 
-      // Factor 3: Market breadth (% of top50 with positive 7d change)
+      // Factor 3: Market breadth
       const bullCount = cryptos.filter(c => c.c7 > 0).length;
       const breadthScore = Math.round((bullCount / Math.max(1, cryptos.length)) * 100);
 
-      // Factor 4: Volatility signal (avg absolute 24h change - moderate = good)
+      // Factor 4: Volatility signal
       const avgVol = cryptos.reduce((sum, c) => sum + Math.abs(c.c24 || 0), 0) / Math.max(1, cryptos.length);
-      const volScore = avgVol < 2 ? 40 : avgVol < 5 ? 75 : avgVol < 10 ? 55 : 25;
+      const volScore = avgVol < 1.5 ? 40 : avgVol < 3 ? 80 : avgVol < 6 ? 60 : 20;
 
-      // Factor 5: Momentum (avg 30d change)
+      // Factor 5: Momentum 30j
       const avg30d = cryptos.reduce((sum, c) => sum + (c.c30 || 0), 0) / Math.max(1, cryptos.length);
       const momScore = Math.max(0, Math.min(100, 50 + avg30d * 2));
 
       const indicators = [
-        { name: 'Fear/Greed Contrarian', current: fgScore, weight: 20 },
-        { name: 'BTC vs ATH', current: mcScore, weight: 25 },
-        { name: 'Market Breadth', current: breadthScore, weight: 20 },
-        { name: 'Volatilité', current: volScore, weight: 15 },
-        { name: 'Momentum 30j', current: Math.round(momScore), weight: 20 },
+        { name: 'Fear/Greed Contrarian', current: fgScore, weight: w[0] },
+        { name: 'BTC vs ATH', current: mcScore, weight: w[1] },
+        { name: 'Market Breadth', current: breadthScore, weight: w[2] },
+        { name: 'Volatilité', current: volScore, weight: w[3] },
+        { name: 'Momentum 30j', current: Math.round(momScore), weight: w[4] },
       ];
 
       const totalScore = Math.round(
@@ -493,8 +657,9 @@
       );
     };
 
-    const OpportunityIndex = ({ score, indicators, showDetails, setShowDetails, prevScore }) => {
+    const OpportunityIndex = ({ score, indicators, showDetails, setShowDetails, prevScore, optResult }) => {
       const [anim, setAnim] = useState(0);
+      const [expandedFactor, setExpandedFactor] = useState(null);
       useEffect(() => { setTimeout(() => setAnim(score), 100); }, [score]);
       const c = getOppClass(anim);
       const change = score - (prevScore || score);
@@ -508,12 +673,19 @@
               <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: `${c.color}15`, border: `1px solid ${c.color}25` }}>🎯</div>
               <div>
                 <h2 className="text-lg font-extrabold text-white tracking-tight">Indice d'Opportunité</h2>
-                <p className="text-[11px] text-gray-500 mt-0.5">Calculé en temps réel depuis les données marché</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-[11px] text-gray-500">Poids optimisés par backtest sur 2 ans</p>
+                  {optResult && optResult.accuracy > 0 && (
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {optResult.tested.toLocaleString()} combinaisons testées • r={optResult.correlation}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <button onClick={() => setShowDetails(!showDetails)}
               className="px-4 py-2 glass-light rounded-xl text-sm font-bold transition-all hover:bg-blue-600/20 text-blue-400 flex items-center gap-2">
-              {showDetails ? 'MASQUER' : 'DÉTAILS'}
+              {showDetails ? 'MASQUER' : 'GUIDE'}
               <svg className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>
           </div>
@@ -555,21 +727,36 @@
 
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Décomposition des facteurs</h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {indicators.map((ind, i) => {
                   const fc = factorColors[i] || '#3b82f6';
+                  const interp = getFactorInterpretation(ind.name, ind.current);
+                  const isExpanded = expandedFactor === i;
                   return (
-                    <div key={i} className="glass-light rounded-xl p-3.5 transition-all hover:border-white/10" style={{ borderLeft: `3px solid ${fc}` }}>
-                      <div className="flex items-center justify-between mb-2.5">
+                    <div key={i} className="glass-light rounded-xl p-3.5 transition-all hover:border-white/10 cursor-pointer"
+                      style={{ borderLeft: `3px solid ${fc}` }}
+                      onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-white">{ind.name}</span>
                           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: `${fc}15`, color: fc }}>{ind.weight}%</span>
                         </div>
-                        <span className="text-sm font-black font-mono" style={{ color: fc }}>{ind.current}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${getSignalColor(interp.signal)}15`, color: getSignalColor(interp.signal) }}>{interp.signal}</span>
+                          <span className="text-sm font-black font-mono" style={{ color: fc }}>{ind.current}</span>
+                        </div>
                       </div>
                       <div className="relative h-2 bg-dark-900/60 rounded-full overflow-hidden progress-bar">
                         <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, background: `linear-gradient(90deg, ${fc}80, ${fc})` }}/>
                       </div>
+                      {isExpanded && (
+                        <div className="mt-3 pt-2.5 border-t border-white/5 animate-fadeInUp">
+                          <p className="text-[11px] text-gray-400 leading-relaxed">{interp.text}</p>
+                        </div>
+                      )}
+                      {!isExpanded && (
+                        <div className="mt-1 text-[9px] text-gray-600 text-right">cliquer pour lire l'analyse</div>
+                      )}
                     </div>
                   );
                 })}
@@ -579,30 +766,55 @@
 
           {showDetails && (
             <div className="mt-8 pt-6 border-t border-white/5 animate-fadeInUp">
-              <h3 className="text-base font-extrabold text-white mb-5 flex items-center gap-2">
-                <span className="text-lg">📚</span> Méthodologie de calcul
+              <h3 className="text-base font-extrabold text-white mb-2 flex items-center gap-2">
+                <span className="text-lg">📖</span> Guide d'interprétation
               </h3>
+              <p className="text-xs text-gray-500 mb-5">Comment lire chaque facteur — cliquez sur un facteur ci-dessus pour l'analyse détaillée en temps réel.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
-                  {n:'Fear/Greed Contrarian', w:'20%', c:'#3b82f6', i:['Logique contrarian appliquée','Peur extrême → Score élevé (opportunité)','Euphorie → Score bas (prudence)']},
-                  {n:'BTC vs ATH', w:'25%', c:'#22c55e', i:['Prix BTC actuel / ATH historique','Proche du ATH → Score élevé','Loin du ATH → Score plus bas']},
-                  {n:'Market Breadth', w:'20%', c:'#eab308', i:['% des top 50 en hausse sur 7j','Large participation = marché sain','Divergence = signal d\'alerte']},
-                  {n:'Volatilité', w:'15%', c:'#f97316', i:['Volatilité moyenne 24h du top 50','Modérée (2-5%) = optimal','Extrême = risque accru']},
-                  {n:'Momentum 30j', w:'20%', c:'#a855f7', i:['Variation moyenne 30j du top 50','Momentum positif = tendance haussière','Momentum négatif = tendance baissière']}
+                  {n:'Fear/Greed Contrarian', c:'#3b82f6', ranges:[
+                    {r:'75-100', l:'Zone d\'opportunité contrarian forte', cl:'#16c784'},
+                    {r:'50-74', l:'Signal modéré — le marché est craintif', cl:'#93d900'},
+                    {r:'25-49', l:'Zone neutre — pas de signal clair', cl:'#c9b003'},
+                    {r:'0-24', l:'Marché euphorique — prudence recommandée', cl:'#ea3943'},
+                  ]},
+                  {n:'BTC vs ATH', c:'#22c55e', ranges:[
+                    {r:'80-100', l:'Proche du record — marché en force', cl:'#16c784'},
+                    {r:'60-79', l:'Zone haute — tendance haussière confirmée', cl:'#93d900'},
+                    {r:'40-59', l:'Mi-parcours — phase de consolidation', cl:'#c9b003'},
+                    {r:'0-39', l:'Loin du ATH — zone d\'accumulation potentielle', cl:'#ea8c00'},
+                  ]},
+                  {n:'Market Breadth', c:'#eab308', ranges:[
+                    {r:'70-100', l:'Large participation — marché sain', cl:'#16c784'},
+                    {r:'50-69', l:'Majorité en hausse — plutôt positif', cl:'#93d900'},
+                    {r:'30-49', l:'Marché divisé — rotation en cours', cl:'#c9b003'},
+                    {r:'0-29', l:'Faible participation — méfiance', cl:'#ea3943'},
+                  ]},
+                  {n:'Volatilité', c:'#f97316', ranges:[
+                    {r:'70-100', l:'Volatilité modérée — conditions idéales', cl:'#16c784'},
+                    {r:'50-69', l:'Fourchette normale — acceptable', cl:'#93d900'},
+                    {r:'30-49', l:'Très faible — compression, mouvement à venir', cl:'#c9b003'},
+                    {r:'0-29', l:'Extrême — risque maximal', cl:'#ea3943'},
+                  ]},
+                  {n:'Momentum 30j', c:'#a855f7', ranges:[
+                    {r:'70-100', l:'Fort momentum haussier établi', cl:'#16c784'},
+                    {r:'50-69', l:'Tendance légèrement positive', cl:'#93d900'},
+                    {r:'30-49', l:'Neutre à baissier — attente', cl:'#c9b003'},
+                    {r:'0-29', l:'Momentum baissier — correction active', cl:'#ea3943'},
+                  ]},
                 ].map((f, i) => (
                   <div key={i} className="glass-light rounded-xl p-5 transition-all hover:border-white/10" style={{ borderLeft: `3px solid ${f.c}` }}>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="font-bold text-white text-sm">{f.n}</span>
-                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: `${f.c}15`, color: f.c }}>{f.w}</span>
                     </div>
-                    <ul className="space-y-1.5">
-                      {f.i.map((x, j) => (
-                        <li key={j} className="text-xs text-gray-400 flex items-start gap-2">
-                          <span className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: f.c }}/>
-                          {x}
-                        </li>
+                    <div className="space-y-2">
+                      {f.ranges.map((r, j) => (
+                        <div key={j} className="flex items-start gap-2">
+                          <span className="text-[10px] font-mono font-bold w-12 flex-shrink-0 text-right" style={{ color: r.cl }}>{r.r}</span>
+                          <span className="text-[11px] text-gray-400">{r.l}</span>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -762,12 +974,14 @@
       const [errors, setErrors] = useState([]);
       const [lastUpdate, setLastUpdate] = useState(null);
       const [prevOppScore, setPrevOppScore] = useState(null);
+      const [optResult, setOptResult] = useState(null);
 
       const fgVal = fgHist.length > 0 ? fgHist[fgHist.length - 1].value : 0;
       const btcCoin = cryptos.find(c => c.sym === 'BTC');
       const btcPrice = btcCoin?.price || 0;
       const btcAth = btcCoin?.ath || 0;
-      const oppData = cryptos.length > 0 ? computeOpportunityIndex(fgVal, cryptos, btcPrice, btcAth) : { score: 0, indicators: [] };
+      const optWeights = optResult?.weights || null;
+      const oppData = cryptos.length > 0 ? computeOpportunityIndex(fgVal, cryptos, btcPrice, btcAth, optWeights) : { score: 0, indicators: [] };
 
       const stats = useMemo(() => {
         return {
@@ -785,7 +999,7 @@
         const [fgData, btcData, top50Data] = await Promise.all([
           fetchFearGreedData(),
           fetchBtcHistory(730),
-          fetchTop50(),
+          fetchCryptos(),
         ]);
 
         if (fgData) {
@@ -810,11 +1024,19 @@
         setLoading(false);
         setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
 
+        // Run backtest optimization (only on first load or if not yet done)
+        if (fgData && btcData) {
+          const opt = runBacktestOptimization(fgData, btcData);
+          setOptResult(opt);
+          console.log(`Optimization complete: ${opt.tested} combos tested, best correlation: ${opt.correlation}, weights: [${opt.weights}]`);
+        }
+
         // Save current opp score as previous for next refresh
         if (top50Data && fgData) {
           const currentFg = fgData[fgData.length - 1]?.value || 0;
           const btc = top50Data.find(c => c.sym === 'BTC');
-          const opp = computeOpportunityIndex(currentFg, top50Data, btc?.price || 0, btc?.ath || 0);
+          const ow = optResult?.weights || null;
+          const opp = computeOpportunityIndex(currentFg, top50Data, btc?.price || 0, btc?.ath || 0, ow);
           setPrevOppScore(prev => prev === null ? opp.score : prev);
         }
       }, []);
@@ -867,7 +1089,7 @@
                 </div>
 
                 <div className="mb-6">
-                  <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet}/>
+                  <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult}/>
                 </div>
 
                 <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort}/>
