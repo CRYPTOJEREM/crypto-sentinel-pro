@@ -78,11 +78,10 @@
 
     // ========== CONFIGURATION ==========
     const CONFIG = {
-      REFRESH_RATE: 120000, // 120s - avoid CoinGecko rate limits
+      REFRESH_RATE: 60000, // 60s
       FNG_API: 'https://api.alternative.me/fng/',
-      COINGECKO_API: 'https://api.coingecko.com/api/v3',
-      CACHE_KEY: 'csp_cache_v2',
-      CACHE_TTL: 300000, // 5 min cache validity
+      COINCAP_API: 'https://api.coincap.io/v2',
+      CACHE_KEY: 'csp_cache_v3',
     };
 
     // ========== CLASSIFICATIONS ==========
@@ -143,7 +142,7 @@
 
     // ========== REAL API FETCHERS ==========
 
-    // Fetch Fear & Greed Index (current + history)
+    // Fetch Fear & Greed Index (current + history) — Alternative.me
     const fetchFearGreedData = async () => {
       try {
         const res = await fetch(`${CONFIG.FNG_API}?limit=731&format=json&date_format=world`);
@@ -163,13 +162,18 @@
       }
     };
 
-    // Fetch BTC price history from CoinGecko
-    const fetchBtcHistory = async (days = 730) => {
+    // Fetch BTC price history — CoinCap API
+    const fetchBtcHistory = async () => {
       try {
-        const res = await fetch(`${CONFIG.COINGECKO_API}/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`);
-        if (!res.ok) throw new Error(`CoinGecko BTC history error: ${res.status}`);
+        const end = Date.now();
+        const start = end - (730 * 24 * 60 * 60 * 1000);
+        const res = await fetch(`${CONFIG.COINCAP_API}/assets/bitcoin/history?interval=d1&start=${start}&end=${end}`);
+        if (!res.ok) throw new Error(`CoinCap BTC history error: ${res.status}`);
         const json = await res.json();
-        const data = json.prices.map(([ts, price]) => ({ ts: Math.floor(ts / 1000), price }));
+        const data = json.data.map(d => ({
+          ts: Math.floor(d.time / 1000),
+          price: parseFloat(d.priceUsd)
+        }));
         saveCache('btc', data);
         return data;
       } catch (err) {
@@ -178,33 +182,32 @@
       }
     };
 
-    // Fetch Top 100 cryptos from CoinGecko (single page to reduce API calls)
+    // Fetch Top 100 cryptos — CoinCap API
     const fetchCryptos = async () => {
       try {
-        const url = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`CoinGecko markets error: ${res.status}`);
-        const coins = await res.json();
-        if (!Array.isArray(coins)) throw new Error('Invalid response format');
-        const data = coins.map((coin, i) => ({
+        const res = await fetch(`${CONFIG.COINCAP_API}/assets?limit=100`);
+        if (!res.ok) throw new Error(`CoinCap assets error: ${res.status}`);
+        const json = await res.json();
+        if (!json.data || !Array.isArray(json.data)) throw new Error('Invalid response format');
+        const data = json.data.map((coin, i) => ({
           id: i + 1,
           cgId: coin.id,
-          sym: coin.symbol.toUpperCase(),
+          sym: coin.symbol,
           name: coin.name,
-          image: coin.image,
-          price: coin.current_price || 0,
-          marketCap: coin.market_cap || 0,
-          volume24h: coin.total_volume || 0,
-          c1h: coin.price_change_percentage_1h_in_currency || 0,
-          c24: coin.price_change_percentage_24h || 0,
-          c7: coin.price_change_percentage_7d_in_currency || 0,
-          c30: coin.price_change_percentage_30d_in_currency || 0,
-          ath: coin.ath || 0,
-          athChange: coin.ath_change_percentage || 0,
-          sparkline: coin.sparkline_in_7d?.price || [],
-          circulatingSupply: coin.circulating_supply || 0,
-          totalSupply: coin.total_supply || 0,
-          lastUpdated: coin.last_updated,
+          image: `https://assets.coincap.io/assets/icons/${coin.symbol.toLowerCase()}@2x.png`,
+          price: parseFloat(coin.priceUsd) || 0,
+          marketCap: parseFloat(coin.marketCapUsd) || 0,
+          volume24h: parseFloat(coin.volumeUsd24Hr) || 0,
+          c24: parseFloat(coin.changePercent24Hr) || 0,
+          c7: 0,
+          c30: 0,
+          c1h: 0,
+          ath: 0,
+          athChange: 0,
+          sparkline: [],
+          vwap24Hr: parseFloat(coin.vwap24Hr) || 0,
+          supply: parseFloat(coin.supply) || 0,
+          maxSupply: parseFloat(coin.maxSupply) || 0,
         }));
         saveCache('cryptos', data);
         return data;
@@ -214,49 +217,94 @@
       }
     };
 
+    // Fetch 7d history for top coins to compute 7d/30d changes
+    const enrichCryptosWithHistory = async (cryptos) => {
+      if (!cryptos || cryptos.length === 0) return cryptos;
+      const end = Date.now();
+      const start30d = end - (30 * 24 * 60 * 60 * 1000);
+      // Only fetch history for top 20 to limit API calls
+      const topIds = cryptos.slice(0, 20).map(c => c.cgId);
+      const enriched = [...cryptos];
+
+      for (let idx = 0; idx < topIds.length; idx++) {
+        try {
+          const res = await fetch(`${CONFIG.COINCAP_API}/assets/${topIds[idx]}/history?interval=d1&start=${start30d}&end=${end}`);
+          if (!res.ok) continue;
+          const json = await res.json();
+          if (!json.data || json.data.length < 2) continue;
+
+          const prices = json.data.map(d => parseFloat(d.priceUsd));
+          const currentPrice = prices[prices.length - 1];
+          const price7dAgo = prices.length >= 7 ? prices[prices.length - 7] : prices[0];
+          const price30dAgo = prices[0];
+
+          enriched[idx].c7 = ((currentPrice - price7dAgo) / price7dAgo) * 100;
+          enriched[idx].c30 = ((currentPrice - price30dAgo) / price30dAgo) * 100;
+          enriched[idx].sparkline = prices.slice(-7);
+
+          // Estimate ATH from available data
+          const maxPrice = Math.max(...prices);
+          enriched[idx].ath = maxPrice;
+          enriched[idx].athChange = ((currentPrice - maxPrice) / maxPrice) * 100;
+        } catch (e) { /* skip enrichment for this coin */ }
+      }
+
+      saveCache('cryptos', enriched);
+      return enriched;
+    };
+
     // ========== SENTIMENT CALCULATOR ==========
     // Compute a sentiment score (0-100) from real market data
     const computeSentiment = (coin) => {
-      let score = 50; // base neutral
-
-      // Factor 1: 24h price change (-10 to +10 mapped to 0-100 contribution)
+      // Factor 1: 24h price change (primary signal)
       const c24Contrib = Math.max(0, Math.min(100, 50 + (coin.c24 || 0) * 5));
 
-      // Factor 2: 7d price change
-      const c7Contrib = Math.max(0, Math.min(100, 50 + (coin.c7 || 0) * 3));
+      // Factor 2: 7d price change (if available)
+      const has7d = coin.c7 !== 0;
+      const c7Contrib = has7d ? Math.max(0, Math.min(100, 50 + coin.c7 * 3)) : c24Contrib;
 
-      // Factor 3: 30d price change
-      const c30Contrib = Math.max(0, Math.min(100, 50 + (coin.c30 || 0) * 1.5));
+      // Factor 3: 30d price change (if available)
+      const has30d = coin.c30 !== 0;
+      const c30Contrib = has30d ? Math.max(0, Math.min(100, 50 + coin.c30 * 1.5)) : c24Contrib;
 
-      // Factor 4: Distance from ATH (closer = more bullish)
-      const athContrib = Math.max(0, Math.min(100, 100 + (coin.athChange || -50)));
+      // Factor 4: Volume/VWAP signal
+      const vwapSignal = coin.vwap24Hr > 0 && coin.price > 0
+        ? Math.max(0, Math.min(100, 50 + ((coin.price - coin.vwap24Hr) / coin.vwap24Hr) * 200))
+        : (coin.c24 >= 0 ? 60 : 40);
 
-      // Factor 5: Volume relative signal (high volume with positive price = bullish)
-      const volSignal = coin.c24 >= 0 ? 60 : 40;
+      // Factor 5: Market rank signal (top coins tend to be more stable)
+      const rankSignal = coin.id <= 10 ? 55 : coin.id <= 30 ? 50 : 45;
 
-      // Weighted average
-      score = Math.round(
-        c24Contrib * 0.30 +
-        c7Contrib * 0.25 +
-        c30Contrib * 0.20 +
-        athContrib * 0.15 +
-        volSignal * 0.10
+      // Weighted average - adapt weights based on available data
+      const w24 = 0.35;
+      const w7 = has7d ? 0.25 : 0.10;
+      const w30 = has30d ? 0.15 : 0.05;
+      const wVwap = 0.15;
+      const wRank = 1 - w24 - w7 - w30 - wVwap;
+
+      const score = Math.round(
+        c24Contrib * w24 +
+        c7Contrib * w7 +
+        c30Contrib * w30 +
+        vwapSignal * wVwap +
+        rankSignal * wRank
       );
 
       return Math.max(0, Math.min(100, score));
     };
 
-    // Compute exchange flow estimation from sparkline data
-    const computeFlow = (sparkline) => {
-      if (!sparkline || sparkline.length < 2) return 0;
-      const recent = sparkline.slice(-24); // last 24 data points
-      const older = sparkline.slice(-48, -24);
-      if (older.length === 0) return 0;
-      const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
-      const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
-      const change = ((recentAvg - olderAvg) / olderAvg) * 100;
-      // Negative = price dropping = distribution, Positive = accumulation
-      return Math.round(change * 10) / 10;
+    // Compute trend from sparkline or 24h change
+    const computeFlow = (coin) => {
+      if (coin.sparkline && coin.sparkline.length >= 4) {
+        const recent = coin.sparkline.slice(-3);
+        const older = coin.sparkline.slice(0, 3);
+        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+        if (olderAvg === 0) return 0;
+        return Math.round(((recentAvg - olderAvg) / olderAvg) * 1000) / 10;
+      }
+      // Fallback: use 24h change as trend proxy
+      return Math.round((coin.c24 || 0) * 10) / 10;
     };
 
     // ========== BACKTEST OPTIMIZATION ENGINE ==========
@@ -419,19 +467,19 @@
       // Factor 1: Fear & Greed as contrarian
       const fgScore = fgValue <= 25 ? 85 : fgValue <= 40 ? 70 : fgValue <= 55 ? 50 : fgValue <= 75 ? 35 : 15;
 
-      // Factor 2: BTC vs ATH
+      // Factor 2: BTC vs ATH (use estimated ATH or fallback to ratio-based score)
       const mcScore = btcAth > 0 ? Math.round(Math.min(100, (btcPrice / btcAth) * 100)) : 50;
 
-      // Factor 3: Market breadth
-      const bullCount = cryptos.filter(c => c.c7 > 0).length;
+      // Factor 3: Market breadth (use c24 as fallback when c7 unavailable)
+      const bullCount = cryptos.filter(c => (c.c7 || c.c24 || 0) > 0).length;
       const breadthScore = Math.round((bullCount / Math.max(1, cryptos.length)) * 100);
 
       // Factor 4: Volatility signal
       const avgVol = cryptos.reduce((sum, c) => sum + Math.abs(c.c24 || 0), 0) / Math.max(1, cryptos.length);
       const volScore = avgVol < 1.5 ? 40 : avgVol < 3 ? 80 : avgVol < 6 ? 60 : 20;
 
-      // Factor 5: Momentum 30j
-      const avg30d = cryptos.reduce((sum, c) => sum + (c.c30 || 0), 0) / Math.max(1, cryptos.length);
+      // Factor 5: Momentum (use c30 if available, else c24 scaled)
+      const avg30d = cryptos.reduce((sum, c) => sum + (c.c30 || c.c24 || 0), 0) / Math.max(1, cryptos.length);
       const momScore = Math.max(0, Math.min(100, 50 + avg30d * 2));
 
       const indicators = [
@@ -859,7 +907,7 @@
       const [exp, setExp] = useState(false);
       const sent = computeSentiment(cr);
       const st = getSentimentStyle(sent);
-      const flow = computeFlow(cr.sparkline);
+      const flow = computeFlow(cr);
 
       return (
         <div className="glass rounded-xl p-4 card-hover cursor-pointer animate-fadeInUp"
@@ -1067,34 +1115,36 @@
         }
       }, []);
 
-      // Fetch all data — stagger CoinGecko calls to avoid rate limit
-      const loadAllData = useCallback(async () => {
+      // Fetch all data — CoinCap API (200 req/min, no key needed)
+      const loadAllData = useCallback(async (isFirstLoad = false) => {
         const newErrors = [];
 
-        // 1. Fetch Fear & Greed (different API, no rate limit issue)
-        const fgData = await fetchWithRetry(fetchFearGreedData);
+        // Fetch all 3 APIs in parallel (CoinCap is generous with rate limits)
+        const [fgData, cryptoData, btcData] = await Promise.all([
+          fetchWithRetry(fetchFearGreedData),
+          fetchWithRetry(fetchCryptos),
+          fetchWithRetry(fetchBtcHistory),
+        ]);
+
         if (fgData) {
           setFgHist(fgData);
         } else if (!loadCache('fg')) {
           newErrors.push('Fear & Greed Index indisponible');
         }
 
-        // 2. Wait before hitting CoinGecko
-        await wait(1500);
-
-        // 3. Fetch cryptos from CoinGecko
-        const cryptoData = await fetchWithRetry(fetchCryptos);
+        let finalCryptos = cryptoData;
         if (cryptoData) {
           setCryptos(cryptoData);
+          // Enrich top 20 with 7d/30d data (background, non-blocking)
+          if (isFirstLoad) {
+            enrichCryptosWithHistory(cryptoData).then(enriched => {
+              if (enriched) setCryptos(enriched);
+            });
+          }
         } else if (!loadCache('cryptos')) {
-          newErrors.push('Données marché indisponibles — CoinGecko rate limited');
+          newErrors.push('Données marché indisponibles');
         }
 
-        // 4. Wait again before second CoinGecko call
-        await wait(2000);
-
-        // 5. Fetch BTC history from CoinGecko
-        const btcData = await fetchWithRetry(() => fetchBtcHistory(730));
         if (btcData) {
           setBtcHist(btcData);
         } else if (!loadCache('btc')) {
@@ -1105,17 +1155,16 @@
         setLoading(false);
         setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
 
-        // Run backtest optimization (only on first load or if not yet done)
+        // Run backtest optimization
         const finalFg = fgData || loadCache('fg');
         const finalBtc = btcData || loadCache('btc');
         if (finalFg && finalBtc) {
           const opt = runBacktestOptimization(finalFg, finalBtc);
           setOptResult(opt);
-          console.log(`Optimization: ${opt.tested} combos, r=${opt.correlation}, weights=[${opt.weights}]`);
         }
 
-        // Save current opp score as previous for next refresh
-        const finalCryptos = cryptoData || loadCache('cryptos');
+        // Save current opp score as previous
+        finalCryptos = finalCryptos || loadCache('cryptos');
         if (finalCryptos && finalFg) {
           const currentFg = finalFg[finalFg.length - 1]?.value || 0;
           const btc = finalCryptos.find(c => c.sym === 'BTC');
@@ -1126,8 +1175,8 @@
       }, []);
 
       useEffect(() => {
-        loadAllData();
-        const interval = setInterval(loadAllData, CONFIG.REFRESH_RATE);
+        loadAllData(true);
+        const interval = setInterval(() => loadAllData(false), CONFIG.REFRESH_RATE);
         return () => clearInterval(interval);
       }, [loadAllData]);
 
@@ -1197,7 +1246,7 @@
 
             <footer className="mt-10 pt-6 border-t border-white/5 text-center space-y-2">
               <p className="text-xs text-gray-600 font-medium">
-                CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinGecko
+                CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinCap
               </p>
               <p className="text-[10px] text-gray-700">
                 ⚠️ Ce site ne constitue pas un conseil en investissement. Les cryptomonnaies sont des actifs à haut risque.
