@@ -4,48 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Crypto Sentinel Pro - Dashboard de sentiment crypto avec Fear & Greed Index">
-  <meta name="theme-color" content="#0a1628">
+  <meta name="theme-color" content="#070d1a">
   <title>Crypto Sentinel Pro</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            dark: { 900: '#070d1a', 800: '#0a1628', 700: '#0d1f38', 600: '#0f2744', 500: '#142d4c', 400: '#1a3656', 300: '#1e3a5f', 200: '#2a4a6f', 100: '#3a5a7f' },
+            accent: { red: '#ea3943', orange: '#ea8c00', yellow: '#c9b003', lime: '#93d900', green: '#16c784', emerald: '#22c55e', blue: '#3b82f6', purple: '#a855f7', cyan: '#06b6d4' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #0a1628; }
-    ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #2a4a6f; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #070d1a; overflow-x: hidden; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(30, 58, 95, 0.6); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(42, 74, 111, 0.8); }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 6px currentColor); } 50% { filter: drop-shadow(0 0 14px currentColor); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    .animate-glow { animation: glow 3s ease-in-out infinite; }
+    .animate-fadeInUp { animation: fadeInUp 0.5s ease-out both; }
+    .animate-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%); background-size: 200% 100%; animation: shimmer 3s ease-in-out infinite; }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-spin { animation: spin 1s linear infinite; }
+
+    .glass { background: rgba(15, 39, 68, 0.5); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(30, 58, 95, 0.5); }
+    .glass-light { background: rgba(26, 54, 86, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(30, 58, 95, 0.3); }
+
+    .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-hover:hover { transform: translateY(-2px); border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.1); }
+
+    .text-gradient { background: linear-gradient(135deg, #3b82f6, #06b6d4, #16c784); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .bg-grid { background-image: radial-gradient(rgba(30, 58, 95, 0.3) 1px, transparent 1px); background-size: 24px 24px; }
+
+    .progress-bar { position: relative; overflow: hidden; }
+    .progress-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: shimmer 2s ease-in-out infinite; }
+
+    .noise-bg { position: relative; }
+    .noise-bg::before { content: ''; position: absolute; inset: 0; opacity: 0.02; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  
+
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useMemo, useCallback } = React;
 
     // ========== CONFIGURATION ==========
-    const CONFIG = { REFRESH_RATE: 5000 };
+    const CONFIG = {
+      REFRESH_RATE: 60000, // 60s - respectful of API rate limits
+      FNG_API: 'https://api.alternative.me/fng/',
+      COINGECKO_API: 'https://api.coingecko.com/api/v3',
+    };
 
     // ========== CLASSIFICATIONS ==========
     const getFearGreedClass = (v) => {
-      if (v <= 24) return { label: 'Extreme Fear', color: '#ea3943', bg: 'rgba(234,57,67,0.15)', emoji: '😱', desc: 'Capitulation - Opportunité contrarian' };
-      if (v <= 44) return { label: 'Fear', color: '#ea8c00', bg: 'rgba(234,140,0,0.15)', emoji: '😰', desc: 'Sentiment négatif' };
-      if (v <= 55) return { label: 'Neutral', color: '#c9b003', bg: 'rgba(201,176,3,0.15)', emoji: '😐', desc: 'Marché indécis' };
-      if (v <= 74) return { label: 'Greed', color: '#93d900', bg: 'rgba(147,217,0,0.15)', emoji: '😊', desc: 'Optimisme - FOMO' };
-      return { label: 'Extreme Greed', color: '#16c784', bg: 'rgba(22,199,132,0.15)', emoji: '🤑', desc: 'Euphorie - Correction probable' };
+      if (v <= 24) return { label: 'Extreme Fear', color: '#ea3943', bg: 'rgba(234,57,67,0.12)', emoji: '😱', desc: 'Capitulation - Opportunité contrarian' };
+      if (v <= 44) return { label: 'Fear', color: '#ea8c00', bg: 'rgba(234,140,0,0.12)', emoji: '😰', desc: 'Sentiment négatif dominant' };
+      if (v <= 55) return { label: 'Neutral', color: '#c9b003', bg: 'rgba(201,176,3,0.12)', emoji: '😐', desc: 'Marché indécis' };
+      if (v <= 74) return { label: 'Greed', color: '#93d900', bg: 'rgba(147,217,0,0.12)', emoji: '😊', desc: 'Optimisme & FOMO' };
+      return { label: 'Extreme Greed', color: '#16c784', bg: 'rgba(22,199,132,0.12)', emoji: '🤑', desc: 'Euphorie - Correction probable' };
     };
 
     const getOppClass = (v) => {
       if (v <= 20) return { label: 'ÉVITER', color: '#ea3943', emoji: '🚫', desc: 'Conditions défavorables' };
-      if (v <= 40) return { label: 'PRUDENCE', color: '#ea8c00', emoji: '⚠️', desc: 'Attendre' };
+      if (v <= 40) return { label: 'PRUDENCE', color: '#ea8c00', emoji: '⚠️', desc: 'Attendre de meilleures conditions' };
       if (v <= 60) return { label: 'NEUTRE', color: '#c9b003', emoji: '😐', desc: 'Conditions moyennes' };
-      if (v <= 80) return { label: 'FAVORABLE', color: '#93d900', emoji: '✅', desc: 'Bonnes conditions' };
-      return { label: 'EXCELLENT', color: '#16c784', emoji: '🎯', desc: 'Optimal' };
+      if (v <= 80) return { label: 'FAVORABLE', color: '#93d900', emoji: '✅', desc: 'Bonnes conditions d\'entrée' };
+      return { label: 'EXCELLENT', color: '#16c784', emoji: '🎯', desc: 'Conditions optimales' };
     };
 
     const getSentimentStyle = (v) => {
@@ -55,248 +107,792 @@
       return { color: '#16c784', label: 'V.BULLISH' };
     };
 
-    // ========== DATA GENERATORS ==========
-    const genFearGreedHistory = () => {
-      const data = []; let v = 50;
-      for (let i = 730; i >= 0; i--) {
-        const t = Date.now() - i * 86400000;
-        v = Math.max(5, Math.min(95, v * 0.95 + (50 + Math.sin(i/60)*20 + (Math.random()-0.5)*15) * 0.05));
-        data.push({ ts: Math.floor(t/1000), value: Math.round(v), date: new Date(t).toISOString().split('T')[0] });
+    // ========== REAL API FETCHERS ==========
+
+    // Fetch Fear & Greed Index (current + history)
+    const fetchFearGreedData = async () => {
+      try {
+        const res = await fetch(`${CONFIG.FNG_API}?limit=731&format=json&date_format=world`);
+        if (!res.ok) throw new Error(`FNG API error: ${res.status}`);
+        const json = await res.json();
+        // Data comes newest-first, reverse for chronological order
+        const data = json.data.reverse().map(d => ({
+          ts: parseInt(d.timestamp),
+          value: parseInt(d.value),
+          classification: d.value_classification,
+          date: new Date(parseInt(d.timestamp) * 1000).toISOString().split('T')[0]
+        }));
+        return data;
+      } catch (err) {
+        console.error('Fear & Greed fetch error:', err);
+        return null;
       }
-      [26,28,25,27,30,32,35].forEach((val,i) => data[data.length-1-i].value = val);
-      return data;
     };
 
-    const genBtcHistory = (fg) => fg.map(f => ({ ts: f.ts, price: Math.max(20000, Math.min(150000, 60000 + (f.value-50)*800 + (Math.random()-0.5)*5000)) }));
-
-    const genTop50 = () => {
-      const base = [
-        { id:1, sym:'BTC', name:'Bitcoin', icon:'₿', price:97845, c24:2.34, c7:5.67, c30:12.45, sent:72, sentP:65, sH:[58,62,65,68,72], flow:-1.2, vsBtc:0 },
-        { id:2, sym:'ETH', name:'Ethereum', icon:'Ξ', price:3456, c24:1.87, c7:4.23, c30:8.91, sent:68, sentP:62, sH:[55,58,60,64,68], flow:-0.8, vsBtc:-2.3 },
-        { id:3, sym:'BNB', name:'BNB', icon:'◇', price:612, c24:-0.54, c7:2.11, c30:5.34, sent:55, sentP:58, sH:[60,58,56,55,55], flow:0.5, vsBtc:-4.2 },
-        { id:4, sym:'SOL', name:'Solana', icon:'◎', price:198, c24:4.21, c7:8.45, c30:22.3, sent:81, sentP:72, sH:[65,70,74,78,81], flow:-2.1, vsBtc:8.5 },
-        { id:5, sym:'XRP', name:'XRP', icon:'✕', price:2.34, c24:-1.23, c7:3.45, c30:15.67, sent:48, sentP:52, sH:[55,53,51,50,48], flow:1.8, vsBtc:-6.1 },
-        { id:6, sym:'ADA', name:'Cardano', icon:'₳', price:0.89, c24:0.67, c7:2.34, c30:6.78, sent:52, sentP:48, sH:[45,46,48,50,52], flow:0.3, vsBtc:1.2 },
-        { id:7, sym:'DOGE', name:'Dogecoin', icon:'Ð', price:0.32, c24:3.45, c7:12.34, c30:25.67, sent:65, sentP:58, sH:[50,54,58,62,65], flow:-0.5, vsBtc:5.8 },
-        { id:8, sym:'AVAX', name:'Avalanche', icon:'▲', price:38.5, c24:2.12, c7:5.67, c30:11.23, sent:61, sentP:55, sH:[48,51,54,58,61], flow:-0.9, vsBtc:3.2 },
-        { id:9, sym:'DOT', name:'Polkadot', icon:'●', price:7.23, c24:-0.89, c7:1.23, c30:3.45, sent:45, sentP:50, sH:[54,52,50,48,45], flow:0.7, vsBtc:-5.3 },
-        { id:10, sym:'LINK', name:'Chainlink', icon:'⬡', price:18.9, c24:1.56, c7:4.56, c30:9.87, sent:67, sentP:60, sH:[52,55,58,63,67], flow:-1.1, vsBtc:4.1 },
-        { id:11, sym:'MATIC', name:'Polygon', icon:'⬢', price:0.54, c24:-2.34, c7:-1.23, c30:-5.67, sent:38, sentP:52, sH:[58,52,46,42,38], flow:1.5, vsBtc:-12.4 },
-        { id:12, sym:'SHIB', name:'Shiba Inu', icon:'🐕', price:0.000024, c24:5.67, c7:15.34, c30:28.9, sent:62, sentP:50, sH:[42,48,52,58,62], flow:-0.4, vsBtc:9.2 },
-        { id:13, sym:'UNI', name:'Uniswap', icon:'🦄', price:12.4, c24:0.98, c7:3.21, c30:7.65, sent:54, sentP:51, sH:[48,49,50,52,54], flow:0.1, vsBtc:0.5 },
-        { id:14, sym:'ATOM', name:'Cosmos', icon:'⚛', price:9.87, c24:-1.45, c7:0.89, c30:2.34, sent:46, sentP:50, sH:[52,50,49,48,46], flow:0.6, vsBtc:-3.8 },
-        { id:15, sym:'LTC', name:'Litecoin', icon:'Ł', price:98.5, c24:0.23, c7:2.45, c30:5.67, sent:51, sentP:49, sH:[47,48,48,50,51], flow:0.2, vsBtc:0.8 },
-        { id:16, sym:'NEAR', name:'NEAR', icon:'Ⓝ', price:5.67, c24:3.21, c7:7.89, c30:14.56, sent:66, sentP:56, sH:[48,52,56,62,66], flow:-0.9, vsBtc:6.3 },
-        { id:17, sym:'APT', name:'Aptos', icon:'◈', price:9.12, c24:-0.67, c7:1.89, c30:4.56, sent:44, sentP:50, sH:[54,52,50,47,44], flow:0.8, vsBtc:-4.1 },
-        { id:18, sym:'ARB', name:'Arbitrum', icon:'🔷', price:1.23, c24:2.89, c7:6.78, c30:12.34, sent:62, sentP:54, sH:[46,50,54,58,62], flow:-0.5, vsBtc:4.5 },
-        { id:19, sym:'OP', name:'Optimism', icon:'🔴', price:2.45, c24:1.78, c7:5.43, c30:10.21, sent:58, sentP:53, sH:[48,50,52,55,58], flow:-0.3, vsBtc:2.8 },
-        { id:20, sym:'INJ', name:'Injective', icon:'💉', price:24.3, c24:4.56, c7:9.87, c30:18.76, sent:74, sentP:64, sH:[56,60,64,70,74], flow:-1.6, vsBtc:7.8 },
-      ];
-      const extra = ['FIL','IMX','RENDER','SUI','TIA','STX','SEI','FET','PEPE','WIF','AAVE','GRT','MKR','XLM','ALGO','HBAR','VET','ICP','RUNE','SAND','MANA','AXS','FLOW','THETA','EOS','XTZ','EGLD','GALA','ENJ','CRV'];
-      const names = ['Filecoin','Immutable','Render','Sui','Celestia','Stacks','Sei','Fetch.ai','Pepe','dogwifhat','Aave','The Graph','Maker','Stellar','Algorand','Hedera','VeChain','ICP','THORChain','Sandbox','Decentraland','Axie','Flow','Theta','EOS','Tezos','MultiversX','Gala','Enjin','Curve'];
-      const icons = ['📁','🎮','🎨','💧','🌌','📚','🌊','🤖','🐸','🎩','👻','📊','🏛️','✨','🔺','ℏ','✓','∞','⚡','🏖️','🌐','🎮','🌊','θ','◉','ꜩ','⬡','🎪','🎯','📈'];
-      for (let i=0; i<30; i++) {
-        base.push({
-          id:21+i, sym:extra[i], name:names[i], icon:icons[i],
-          price:[5.89,2.15,8.76,3.45,12.3,2.34,0.56,2.12,0.000012,2.87,267,0.23,1890,0.12,0.21,0.089,0.034,12.4,5.67,0.45,0.52,7.89,0.78,1.89,0.82,1.12,42.3,0.045,0.34,0.89][i],
-          c24:[-1.23,2.34,3.45,5.67,2.89,1.23,3.21,4.32,6.78,5.43,1.89,2.34,0.98,1.45,0.89,2.12,1.67,-0.56,2.89,1.23,0.78,1.56,2.34,1.12,0.67,0.89,1.78,3.45,2.12,1.89][i],
-          c7:[2.34,5.67,8.9,12.34,7.65,4.56,8.76,11.23,18.9,14.32,5.43,6.78,3.21,4.32,2.67,5.89,4.56,1.89,7.65,3.45,2.34,4.32,5.67,3.45,2.12,2.67,4.89,8.9,5.43,4.56][i],
-          c30:[5.67,11.23,16.78,24.56,15.43,9.87,17.65,23.45,35.67,28.76,12.34,13.45,7.65,9.87,5.43,11.23,8.9,4.32,14.32,7.89,5.67,9.12,11.23,7.89,4.56,5.89,10.23,17.65,11.23,9.12][i],
-          sent:[44,58,70,76,68,56,64,72,65,70,66,58,52,50,46,56,54,42,63,48,46,52,57,50,42,46,55,61,54,56][i],
-          sentP:[48,52,62,66,60,52,56,64,54,60,60,52,50,48,48,50,50,46,56,46,44,50,52,48,44,44,50,54,50,52][i],
-          sH:[[50,48,46,45,44],[50,52,54,56,58],[58,62,65,68,70],[62,66,70,74,76],[56,60,62,66,68],[50,52,53,55,56],[52,56,58,62,64],[60,64,66,70,72],[48,54,58,62,65],[56,60,64,68,70],[56,58,60,64,66],[50,52,54,56,58],[50,50,51,51,52],[47,48,48,50,50],[50,48,47,46,46],[48,50,52,54,56],[48,50,51,53,54],[48,46,44,43,42],[52,55,58,60,63],[44,45,46,47,48],[43,44,45,45,46],[48,49,50,51,52],[50,52,54,55,57],[47,48,49,49,50],[46,44,43,43,42],[44,44,45,45,46],[48,50,52,54,55],[50,54,56,58,61],[48,50,51,53,54],[50,52,53,55,56]][i],
-          flow:[0.9,-0.7,-1.3,-1.9,-1.0,-0.4,-0.8,-1.5,-0.6,-1.2,-0.9,-0.5,0.2,0.3,0.6,-0.4,-0.3,1.0,-0.8,0.4,0.5,0.2,-0.5,0.3,0.7,0.4,-0.3,-0.7,-0.4,-0.5][i],
-          vsBtc:[-3.2,3.5,6.2,10.2,5.8,2.1,5.4,8.9,12.3,11.5,4.2,3.1,0.8,1.2,-2.3,3.4,1.8,-4.5,5.1,0.6,0.3,1.5,2.8,0.9,-3.1,0.2,2.4,6.8,2.2,2.6][i]
-        });
+    // Fetch BTC price history from CoinGecko
+    const fetchBtcHistory = async (days = 730) => {
+      try {
+        const res = await fetch(`${CONFIG.COINGECKO_API}/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`);
+        if (!res.ok) throw new Error(`CoinGecko BTC history error: ${res.status}`);
+        const json = await res.json();
+        return json.prices.map(([ts, price]) => ({ ts: Math.floor(ts / 1000), price }));
+      } catch (err) {
+        console.error('BTC history fetch error:', err);
+        return null;
       }
-      return base;
+    };
+
+    // Fetch Top 50 cryptos from CoinGecko
+    const fetchTop50 = async () => {
+      try {
+        const res = await fetch(`${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`);
+        if (!res.ok) throw new Error(`CoinGecko markets error: ${res.status}`);
+        const json = await res.json();
+        return json.map((coin, i) => ({
+          id: i + 1,
+          cgId: coin.id,
+          sym: coin.symbol.toUpperCase(),
+          name: coin.name,
+          image: coin.image,
+          price: coin.current_price || 0,
+          marketCap: coin.market_cap || 0,
+          volume24h: coin.total_volume || 0,
+          c1h: coin.price_change_percentage_1h_in_currency || 0,
+          c24: coin.price_change_percentage_24h || 0,
+          c7: coin.price_change_percentage_7d_in_currency || 0,
+          c30: coin.price_change_percentage_30d_in_currency || 0,
+          ath: coin.ath || 0,
+          athChange: coin.ath_change_percentage || 0,
+          sparkline: coin.sparkline_in_7d?.price || [],
+          circulatingSupply: coin.circulating_supply || 0,
+          totalSupply: coin.total_supply || 0,
+          lastUpdated: coin.last_updated,
+        }));
+      } catch (err) {
+        console.error('Top 50 fetch error:', err);
+        return null;
+      }
+    };
+
+    // ========== SENTIMENT CALCULATOR ==========
+    // Compute a sentiment score (0-100) from real market data
+    const computeSentiment = (coin) => {
+      let score = 50; // base neutral
+
+      // Factor 1: 24h price change (-10 to +10 mapped to 0-100 contribution)
+      const c24Contrib = Math.max(0, Math.min(100, 50 + (coin.c24 || 0) * 5));
+
+      // Factor 2: 7d price change
+      const c7Contrib = Math.max(0, Math.min(100, 50 + (coin.c7 || 0) * 3));
+
+      // Factor 3: 30d price change
+      const c30Contrib = Math.max(0, Math.min(100, 50 + (coin.c30 || 0) * 1.5));
+
+      // Factor 4: Distance from ATH (closer = more bullish)
+      const athContrib = Math.max(0, Math.min(100, 100 + (coin.athChange || -50)));
+
+      // Factor 5: Volume relative signal (high volume with positive price = bullish)
+      const volSignal = coin.c24 >= 0 ? 60 : 40;
+
+      // Weighted average
+      score = Math.round(
+        c24Contrib * 0.30 +
+        c7Contrib * 0.25 +
+        c30Contrib * 0.20 +
+        athContrib * 0.15 +
+        volSignal * 0.10
+      );
+
+      return Math.max(0, Math.min(100, score));
+    };
+
+    // Compute exchange flow estimation from sparkline data
+    const computeFlow = (sparkline) => {
+      if (!sparkline || sparkline.length < 2) return 0;
+      const recent = sparkline.slice(-24); // last 24 data points
+      const older = sparkline.slice(-48, -24);
+      if (older.length === 0) return 0;
+      const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+      const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+      const change = ((recentAvg - olderAvg) / olderAvg) * 100;
+      // Negative = price dropping = distribution, Positive = accumulation
+      return Math.round(change * 10) / 10;
+    };
+
+    // Compute Opportunity Index from real market data
+    const computeOpportunityIndex = (fgValue, cryptos, btcPrice, btcAth) => {
+      // Factor 1: Fear & Greed as contrarian (low fear = high opportunity)
+      const fgScore = fgValue <= 25 ? 85 : fgValue <= 40 ? 70 : fgValue <= 55 ? 50 : fgValue <= 75 ? 35 : 15;
+
+      // Factor 2: Market Cap vs ATH (BTC as proxy)
+      const mcScore = btcAth > 0 ? Math.round(Math.min(100, (btcPrice / btcAth) * 100)) : 50;
+
+      // Factor 3: Market breadth (% of top50 with positive 7d change)
+      const bullCount = cryptos.filter(c => c.c7 > 0).length;
+      const breadthScore = Math.round((bullCount / Math.max(1, cryptos.length)) * 100);
+
+      // Factor 4: Volatility signal (avg absolute 24h change - moderate = good)
+      const avgVol = cryptos.reduce((sum, c) => sum + Math.abs(c.c24 || 0), 0) / Math.max(1, cryptos.length);
+      const volScore = avgVol < 2 ? 40 : avgVol < 5 ? 75 : avgVol < 10 ? 55 : 25;
+
+      // Factor 5: Momentum (avg 30d change)
+      const avg30d = cryptos.reduce((sum, c) => sum + (c.c30 || 0), 0) / Math.max(1, cryptos.length);
+      const momScore = Math.max(0, Math.min(100, 50 + avg30d * 2));
+
+      const indicators = [
+        { name: 'Fear/Greed Contrarian', current: fgScore, weight: 20 },
+        { name: 'BTC vs ATH', current: mcScore, weight: 25 },
+        { name: 'Market Breadth', current: breadthScore, weight: 20 },
+        { name: 'Volatilité', current: volScore, weight: 15 },
+        { name: 'Momentum 30j', current: Math.round(momScore), weight: 20 },
+      ];
+
+      const totalScore = Math.round(
+        indicators.reduce((sum, ind) => sum + ind.current * (ind.weight / 100), 0)
+      );
+
+      return { score: Math.max(0, Math.min(100, totalScore)), indicators };
+    };
+
+    // ========== MINI COMPONENTS ==========
+    const Badge = ({ children, color, glow }) => (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all"
+        style={{ backgroundColor: `${color}15`, color, border: `1px solid ${color}25`, boxShadow: glow ? `0 0 12px ${color}20` : 'none' }}>
+        {children}
+      </span>
+    );
+
+    const StatChip = ({ label, value, color }) => (
+      <div className="px-4 py-2.5 rounded-xl text-center transition-all" style={{ backgroundColor: `${color}08`, border: `1px solid ${color}15` }}>
+        <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color }}>{label}</div>
+        <div className="text-2xl font-black text-white mt-0.5 font-mono">{value}</div>
+      </div>
+    );
+
+    const Loader = ({ text }) => (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="text-gray-400 text-sm font-medium">{text || 'Chargement des données...'}</p>
+      </div>
+    );
+
+    const ErrorBanner = ({ message, onRetry }) => (
+      <div className="glass rounded-xl p-4 mb-4 border-l-4 border-red-500 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-red-400 text-lg">⚠️</span>
+          <span className="text-sm text-gray-300">{message}</span>
+        </div>
+        {onRetry && <button onClick={onRetry} className="px-3 py-1.5 bg-blue-600/20 text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-600/30 transition-all">Réessayer</button>}
+      </div>
+    );
+
+    const MiniSparkline = ({ data, width = 60, height = 24 }) => {
+      if (!data || data.length < 2) return null;
+      // Sample down to ~20 points for perf
+      const step = Math.max(1, Math.floor(data.length / 20));
+      const sampled = data.filter((_, i) => i % step === 0 || i === data.length - 1);
+      const min = Math.min(...sampled);
+      const max = Math.max(...sampled);
+      const range = max - min || 1;
+      const points = sampled.map((v, i) => {
+        const x = (i / (sampled.length - 1)) * width;
+        const y = height - ((v - min) / range) * (height - 2) - 1;
+        return `${x},${y}`;
+      }).join(' ');
+      const lastVal = sampled[sampled.length - 1];
+      const firstVal = sampled[0];
+      const lineColor = lastVal >= firstVal ? '#16c784' : '#ea3943';
+      return (
+        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+          <defs>
+            <linearGradient id={`sp-${Math.round(lastVal)}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={lineColor} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={lineColor} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <polygon points={`0,${height} ${points} ${width},${height}`} fill={`url(#sp-${Math.round(lastVal)})`} />
+          <polyline points={points} fill="none" stroke={lineColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={width} cy={height - ((lastVal - min) / range) * (height - 2) - 1} r="2" fill={lineColor} />
+        </svg>
+      );
     };
 
     // ========== COMPONENTS ==========
     const FearGreedIndex = ({ value, history, btcHistory }) => {
       const [range, setRange] = useState('1y');
+      if (!history || history.length === 0) return <div className="glass rounded-2xl p-6"><Loader text="Chargement Fear & Greed Index..." /></div>;
+
       const c = getFearGreedClass(value);
-      const yesterday = history[history.length-2]?.value || 0;
-      const lastWeek = history[history.length-8]?.value || 0;
-      const lastMonth = history[history.length-31]?.value || 0;
+      const yesterday = history[history.length - 2]?.value || 0;
+      const lastWeek = history[history.length - 8]?.value || 0;
+      const lastMonth = history[history.length - 31]?.value || 0;
       const yearData = history.slice(-365);
-      const yHigh = Math.max(...yearData.map(d=>d.value));
-      const yLow = Math.min(...yearData.map(d=>d.value));
-      const filtered = range==='30d' ? history.slice(-30) : range==='1y' ? history.slice(-365) : history;
-      const filteredBtc = range==='30d' ? btcHistory.slice(-30) : range==='1y' ? btcHistory.slice(-365) : btcHistory;
+      const yHigh = Math.max(...yearData.map(d => d.value));
+      const yLow = Math.min(...yearData.map(d => d.value));
+      const filtered = range === '30d' ? history.slice(-30) : range === '1y' ? history.slice(-365) : history;
+
+      // Align BTC history with FG history by date
+      const filteredBtc = range === '30d' ? (btcHistory || []).slice(-30) : range === '1y' ? (btcHistory || []).slice(-365) : (btcHistory || []);
+      const btcMin = filteredBtc.length > 0 ? Math.min(...filteredBtc.map(b => b.price)) : 0;
+      const btcMax = filteredBtc.length > 0 ? Math.max(...filteredBtc.map(b => b.price)) : 1;
+
+      const needleAngle = -90 + (value / 100) * 180;
+
+      // Dynamic date labels
+      const getDateLabels = () => {
+        if (filtered.length === 0) return [];
+        const first = new Date(filtered[0].ts * 1000);
+        const last = new Date(filtered[filtered.length - 1].ts * 1000);
+        const fmt = (d) => d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
+        if (range === '30d') return [fmt(first), fmt(new Date((first.getTime() + last.getTime()) / 2)), 'Auj.'];
+        const step = Math.floor(filtered.length / 4);
+        return [0, step, step*2, step*3, filtered.length-1].map(i => filtered[i] ? fmt(new Date(filtered[i].ts * 1000)) : '');
+      };
 
       return (
-        <div className="bg-[#0f2744] rounded-2xl border border-[#1e3a5f] overflow-hidden">
+        <div className="glass rounded-2xl overflow-hidden animate-fadeInUp">
           <div className="grid grid-cols-1 lg:grid-cols-3">
-            <div className="p-6 border-b lg:border-b-0 lg:border-r border-[#1e3a5f]">
-              <h3 className="text-lg font-bold text-white mb-1">CMC Crypto Fear and Greed Index</h3>
-              <p className="text-xs text-gray-500 mb-4">Source: Alternative.me / CoinMarketCap</p>
-              <div className="flex justify-center mb-4">
-                <svg width="200" height="120" viewBox="0 0 200 120">
-                  <defs><linearGradient id="fgArc" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#ea3943"/><stop offset="25%" stopColor="#ea8c00"/><stop offset="50%" stopColor="#c9b003"/><stop offset="75%" stopColor="#93d900"/><stop offset="100%" stopColor="#16c784"/></linearGradient></defs>
-                  <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1e3a5f" strokeWidth="16" strokeLinecap="round"/>
-                  <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#fgArc)" strokeWidth="16" strokeLinecap="round"/>
-                  <g style={{transform:`rotate(${-90+(value/100)*180}deg)`,transformOrigin:'100px 100px',transition:'transform 1s ease-out'}}>
-                    <line x1="100" y1="100" x2="100" y2="35" stroke={c.color} strokeWidth="3" strokeLinecap="round"/>
-                    <circle cx="100" cy="100" r="8" fill={c.color}/><circle cx="100" cy="100" r="4" fill="#0f2744"/>
+            <div className="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-white/5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color, boxShadow: `0 0 8px ${c.color}` }} />
+                <h3 className="text-base font-bold text-white tracking-tight">Fear & Greed Index</h3>
+              </div>
+              <p className="text-[11px] text-gray-500 mb-6 ml-4">Source: Alternative.me (données réelles)</p>
+
+              <div className="flex justify-center mb-6">
+                <svg width="220" height="135" viewBox="0 0 220 135">
+                  <defs>
+                    <linearGradient id="fgArc" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#ea3943"/><stop offset="25%" stopColor="#ea8c00"/>
+                      <stop offset="50%" stopColor="#c9b003"/><stop offset="75%" stopColor="#93d900"/>
+                      <stop offset="100%" stopColor="#16c784"/>
+                    </linearGradient>
+                    <filter id="fgGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="rgba(30,58,95,0.4)" strokeWidth="14" strokeLinecap="round"/>
+                  <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="url(#fgArc)" strokeWidth="14" strokeLinecap="round" filter="url(#fgGlow)"/>
+                  {[0, 25, 50, 75, 100].map(tick => {
+                    const angle = (-180 + (tick / 100) * 180) * Math.PI / 180;
+                    return <line key={tick} x1={110 + Math.cos(angle) * 78} y1={110 + Math.sin(angle) * 78} x2={110 + Math.cos(angle) * 70} y2={110 + Math.sin(angle) * 70} stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>;
+                  })}
+                  <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '110px 110px', transition: 'transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+                    <line x1="110" y1="110" x2="110" y2="32" stroke={c.color} strokeWidth="2.5" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 6px ${c.color})` }}/>
+                    <circle cx="110" cy="110" r="8" fill={c.color} style={{ filter: `drop-shadow(0 0 8px ${c.color})` }}/>
+                    <circle cx="110" cy="110" r="4" fill="#0f2744"/>
                   </g>
-                  <text x="100" y="85" textAnchor="middle" fill={c.color} fontSize="36" fontWeight="bold">{value}</text>
+                  <text x="110" y="96" textAnchor="middle" fill={c.color} fontSize="38" fontWeight="800" fontFamily="'JetBrains Mono', monospace" style={{ filter: `drop-shadow(0 0 10px ${c.color}40)` }}>{value}</text>
                 </svg>
               </div>
+
               <div className="text-center mb-6">
-                <div className="flex items-center justify-center gap-2 mb-1"><span className="text-3xl">{c.emoji}</span><span className="text-xl font-bold" style={{color:c.color}}>{c.label}</span></div>
-                <p className="text-xs text-gray-400">{c.desc}</p>
+                <div className="flex items-center justify-center gap-2.5 mb-2">
+                  <span className="text-3xl animate-float">{c.emoji}</span>
+                  <span className="text-xl font-extrabold tracking-tight" style={{ color: c.color }}>{c.label}</span>
+                </div>
+                <p className="text-xs text-gray-400 font-medium">{c.desc}</p>
               </div>
-              <div className="space-y-2 mb-4">
-                <h4 className="text-sm font-semibold text-gray-300">Historical Values</h4>
-                {[{l:'Yesterday',v:yesterday},{l:'Last Week',v:lastWeek},{l:'Last Month',v:lastMonth}].map((x,i)=>{const cl=getFearGreedClass(x.v);return(
-                  <div key={i} className="flex items-center justify-between"><span className="text-sm text-gray-400">{x.l}</span><span className="px-3 py-1 rounded-full text-xs font-semibold" style={{backgroundColor:cl.bg,color:cl.color}}>{cl.label} - {x.v}</span></div>
-                );})}
+
+              <div className="space-y-2.5 mb-5">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Historique</h4>
+                {[{l:'Hier', v:yesterday}, {l:'Semaine', v:lastWeek}, {l:'Mois', v:lastMonth}].map((x, i) => {
+                  const cl = getFearGreedClass(x.v);
+                  return (
+                    <div key={i} className="flex items-center justify-between py-1">
+                      <span className="text-sm text-gray-500">{x.l}</span>
+                      <Badge color={cl.color}>{cl.label} - {x.v}</Badge>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="space-y-2 pt-4 border-t border-[#1e3a5f]">
-                <h4 className="text-sm font-semibold text-gray-300">Yearly High / Low</h4>
-                <div className="flex items-center justify-between"><span className="text-xs text-gray-500">High</span><span className="px-3 py-1 rounded-full text-xs font-semibold" style={{backgroundColor:getFearGreedClass(yHigh).bg,color:getFearGreedClass(yHigh).color}}>{getFearGreedClass(yHigh).label} - {yHigh}</span></div>
-                <div className="flex items-center justify-between"><span className="text-xs text-gray-500">Low</span><span className="px-3 py-1 rounded-full text-xs font-semibold" style={{backgroundColor:getFearGreedClass(yLow).bg,color:getFearGreedClass(yLow).color}}>{getFearGreedClass(yLow).label} - {yLow}</span></div>
+
+              <div className="space-y-2.5 pt-4 border-t border-white/5">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Annuel</h4>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-xs text-gray-500 flex items-center gap-1.5"><span className="text-emerald-400">▲</span> High</span>
+                  <Badge color={getFearGreedClass(yHigh).color} glow>{getFearGreedClass(yHigh).label} - {yHigh}</Badge>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-xs text-gray-500 flex items-center gap-1.5"><span className="text-red-400">▼</span> Low</span>
+                  <Badge color={getFearGreedClass(yLow).color}>{getFearGreedClass(yLow).label} - {yLow}</Badge>
+                </div>
               </div>
             </div>
-            <div className="lg:col-span-2 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div><h3 className="text-lg font-bold text-white">Fear and Greed Index Chart</h3><div className="flex items-center gap-4 mt-2 text-xs"><div className="flex items-center gap-1"><span className="w-3 h-0.5 bg-orange-500 rounded"></span><span className="text-gray-400">Fear & Greed</span></div><div className="flex items-center gap-1"><span className="w-3 h-0.5 bg-gray-500 rounded"></span><span className="text-gray-400">BTC Price</span></div></div></div>
-                <div className="flex gap-1 bg-[#1e3a5f] rounded-lg p-1">{['30d','1y','All'].map(r=>(<button key={r} onClick={()=>setRange(r)} className={`px-3 py-1 rounded text-xs font-semibold transition-all ${range===r?'bg-blue-600 text-white':'text-gray-400 hover:text-white'}`}>{r}</button>))}</div>
+
+            <div className="lg:col-span-2 p-6 lg:p-8">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">Graphique Fear & Greed</h3>
+                  <div className="flex items-center gap-5 mt-2 text-xs">
+                    <div className="flex items-center gap-2"><span className="w-5 h-0.5 rounded-full bg-orange-500"/><span className="text-gray-500">Fear & Greed</span></div>
+                    <div className="flex items-center gap-2"><span className="w-5 h-0.5 rounded-full bg-gray-500"/><span className="text-gray-500">BTC Price</span></div>
+                  </div>
+                </div>
+                <div className="flex gap-1 glass-light rounded-xl p-1">
+                  {['30d','1y','All'].map(r => (
+                    <button key={r} onClick={() => setRange(r)}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${range===r ? 'bg-blue-600/80 text-white shadow-lg shadow-blue-600/20' : 'text-gray-500 hover:text-gray-300'}`}>{r}</button>
+                  ))}
+                </div>
               </div>
-              <div className="relative h-72 bg-[#0a1628] rounded-xl overflow-hidden">
-                <div className="absolute inset-0 flex flex-col"><div className="flex-1 bg-[#16c784]/5 border-b border-[#16c784]/20"></div><div className="flex-1 bg-[#93d900]/5 border-b border-[#93d900]/20"></div><div className="flex-1 bg-[#c9b003]/5 border-b border-[#c9b003]/20"></div><div className="flex-1 bg-[#ea8c00]/5 border-b border-[#ea8c00]/20"></div><div className="flex-1 bg-[#ea3943]/5"></div></div>
-                <div className="absolute right-2 top-0 bottom-0 flex flex-col justify-between py-2 text-[10px] text-gray-500 z-10"><span>100</span><span className="text-[#16c784]">Extreme Greed</span><span className="text-[#93d900]">Greed</span><span className="text-[#c9b003]">Neutral</span><span className="text-[#ea8c00]">Fear</span><span className="text-[#ea3943]">Extreme Fear</span><span>0</span></div>
+
+              <div className="relative h-72 bg-dark-900/80 rounded-xl overflow-hidden border border-white/5">
+                <div className="absolute inset-0 flex flex-col">
+                  {[{c:'#16c784'},{c:'#93d900'},{c:'#c9b003'},{c:'#ea8c00'},{c:'#ea3943'}].map((z, i) => (
+                    <div key={i} className="flex-1" style={{ background: `linear-gradient(180deg, ${z.c}06 0%, ${z.c}02 100%)`, borderBottom: i < 4 ? `1px solid ${z.c}12` : 'none' }} />
+                  ))}
+                </div>
+                <div className="absolute right-2.5 top-0 bottom-0 flex flex-col justify-between py-3 text-[9px] font-mono font-medium z-10">
+                  <span className="text-gray-600">100</span>
+                  <span className="text-[#16c784]/60">Extreme Greed</span>
+                  <span className="text-[#93d900]/60">Greed</span>
+                  <span className="text-[#c9b003]/60">Neutral</span>
+                  <span className="text-[#ea8c00]/60">Fear</span>
+                  <span className="text-[#ea3943]/60">Extreme Fear</span>
+                  <span className="text-gray-600">0</span>
+                </div>
                 <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-                  {[20,40,55,74].map(y=>(<line key={y} x1="0" y1={100-y} x2="95" y2={100-y} stroke="rgba(255,255,255,0.05)" strokeWidth="0.2"/>))}
-                  {filtered.map((p,i)=>{if(i===0)return null;const pr=filtered[i-1];const x1=((i-1)/(filtered.length-1))*92;const x2=(i/(filtered.length-1))*92;const y1=100-pr.value;const y2=100-p.value;return<line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={getFearGreedClass((p.value+pr.value)/2).color} strokeWidth="0.4"/>;})}
-                  {filteredBtc.length>0&&<path d={filteredBtc.map((p,i)=>{const x=(i/(filteredBtc.length-1))*92;const y=100-((p.price-20000)/(150000-20000))*100;return`${i===0?'M':'L'} ${x},${Math.max(0,Math.min(100,y))}`;}).join(' ')} fill="none" stroke="rgba(156,163,175,0.4)" strokeWidth="0.3"/>}
+                  {[20,40,55,74].map(y => <line key={y} x1="0" y1={100-y} x2="92" y2={100-y} stroke="rgba(255,255,255,0.03)" strokeWidth="0.2"/>)}
+                  {filteredBtc.length > 1 && (
+                    <path d={filteredBtc.map((p,i) => {
+                      const x = (i/(filteredBtc.length-1))*92;
+                      const y = 100-((p.price-btcMin)/(btcMax-btcMin))*90 - 5;
+                      return `${i===0?'M':'L'} ${x},${Math.max(0,Math.min(100,y))}`;
+                    }).join(' ')} fill="none" stroke="rgba(156,163,175,0.25)" strokeWidth="0.3"/>
+                  )}
+                  <defs>
+                    <linearGradient id="fgFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={c.color} stopOpacity="0.15"/>
+                      <stop offset="100%" stopColor={c.color} stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  {filtered.length > 1 && (
+                    <path d={`M 0,100 ${filtered.map((p,i) => `L ${(i/(filtered.length-1))*92},${100-p.value}`).join(' ')} L ${92},100 Z`} fill="url(#fgFill)"/>
+                  )}
+                  {filtered.map((p,i) => {
+                    if(i===0) return null;
+                    const pr = filtered[i-1];
+                    return <line key={i} x1={((i-1)/(filtered.length-1))*92} y1={100-pr.value} x2={(i/(filtered.length-1))*92} y2={100-p.value} stroke={getFearGreedClass((p.value+pr.value)/2).color} strokeWidth="0.5"/>;
+                  })}
                 </svg>
-                <div className="absolute right-16 px-2 py-1 rounded text-xs font-bold z-20" style={{top:`${100-value}%`,backgroundColor:c.color,color:'#000',transform:'translateY(-50%)'}}>{value}</div>
+                <div className="absolute right-16 px-2.5 py-1 rounded-lg text-xs font-black z-20 font-mono"
+                  style={{ top: `${100-value}%`, backgroundColor: c.color, color: '#000', transform: 'translateY(-50%)', boxShadow: `0 0 16px ${c.color}50` }}>{value}</div>
               </div>
-              <div className="flex justify-between mt-2 text-[10px] text-gray-500 pr-16">{range==='30d'?<><span>30d ago</span><span>20d</span><span>10d</span><span>Today</span></>:range==='1y'?<><span>Feb 2025</span><span>May</span><span>Aug</span><span>Nov</span><span>Feb 2026</span></>:<><span>Feb 2024</span><span>Aug</span><span>Feb 2025</span><span>Aug</span><span>Feb 2026</span></>}</div>
-              <div className="mt-4 p-3 bg-[#1e3a5f] rounded-lg"><p className="text-xs text-gray-400"><strong className="text-gray-300">Tip:</strong> "Be fearful when others are greedy, and greedy when others are fearful." - Warren Buffett</p></div>
+
+              <div className="flex justify-between mt-3 text-[10px] text-gray-600 font-mono pr-16">
+                {getDateLabels().map((lbl, i) => <span key={i}>{lbl}</span>)}
+              </div>
+
+              <div className="mt-5 p-3.5 glass-light rounded-xl">
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  <strong className="text-gray-300">Tip :</strong> "Be fearful when others are greedy, and greedy when others are fearful." — Warren Buffett
+                </p>
+              </div>
             </div>
           </div>
         </div>
       );
     };
 
-    const OpportunityIndex = ({ score, prevScore, indicators, showDetails, setShowDetails }) => {
+    const OpportunityIndex = ({ score, indicators, showDetails, setShowDetails, prevScore }) => {
       const [anim, setAnim] = useState(0);
-      useEffect(()=>{setTimeout(()=>setAnim(score),100);},[score]);
+      useEffect(() => { setTimeout(() => setAnim(score), 100); }, [score]);
       const c = getOppClass(anim);
-      const change = score - prevScore;
+      const change = score - (prevScore || score);
+      const needleAngle = -90 + (anim / 100) * 180;
+      const factorColors = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#a855f7'];
+
       return (
-        <div className="bg-[#0f2744] rounded-2xl border border-[#1e3a5f] p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div><div className="flex items-center gap-2"><span className="text-2xl">🎯</span><h2 className="text-xl font-bold text-white">Indice d'Opportunité</h2></div><p className="text-xs text-gray-500 mt-1">5 facteurs fondamentaux</p></div>
-            <button onClick={()=>setShowDetails(!showDetails)} className="px-4 py-2 bg-blue-600/20 border border-blue-600/50 rounded-xl text-blue-400 text-sm font-semibold hover:bg-blue-600/30">{showDetails?'MASQUER':'DÉTAILS'} 📊</button>
+        <div className="glass rounded-2xl p-6 lg:p-8 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: `${c.color}15`, border: `1px solid ${c.color}25` }}>🎯</div>
+              <div>
+                <h2 className="text-lg font-extrabold text-white tracking-tight">Indice d'Opportunité</h2>
+                <p className="text-[11px] text-gray-500 mt-0.5">Calculé en temps réel depuis les données marché</p>
+              </div>
+            </div>
+            <button onClick={() => setShowDetails(!showDetails)}
+              className="px-4 py-2 glass-light rounded-xl text-sm font-bold transition-all hover:bg-blue-600/20 text-blue-400 flex items-center gap-2">
+              {showDetails ? 'MASQUER' : 'DÉTAILS'}
+              <svg className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="flex flex-col items-center">
-              <svg width="280" height="160" viewBox="0 0 280 160">
-                <defs><linearGradient id="oppG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#ea3943"/><stop offset="25%" stopColor="#ea8c00"/><stop offset="50%" stopColor="#c9b003"/><stop offset="75%" stopColor="#93d900"/><stop offset="100%" stopColor="#16c784"/></linearGradient></defs>
-                <path d="M 25 140 A 115 115 0 0 1 255 140" fill="none" stroke="#1e3a5f" strokeWidth="18" strokeLinecap="round"/>
-                <path d="M 25 140 A 115 115 0 0 1 255 140" fill="none" stroke="url(#oppG)" strokeWidth="18" strokeLinecap="round"/>
-                <g style={{transform:`rotate(${-90+(prevScore/100)*180}deg)`,transformOrigin:'140px 140px'}}><line x1="140" y1="140" x2="140" y2="40" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeDasharray="4 4"/></g>
-                <g style={{transform:`rotate(${-90+(anim/100)*180}deg)`,transformOrigin:'140px 140px',transition:'transform 1.5s ease-out'}}><polygon points="140,35 135,140 145,140" fill={c.color}/><circle cx="140" cy="140" r="10" fill={c.color}/><circle cx="140" cy="140" r="5" fill="#0f2744"/></g>
-                <text x="140" y="120" textAnchor="middle" fill={c.color} fontSize="42" fontWeight="bold">{Math.round(anim)}</text>
-                <text x="20" y="155" fill="#ea3943" fontSize="10" fontWeight="bold">0</text><text x="250" y="155" fill="#16c784" fontSize="10" fontWeight="bold">100</text>
+              <svg width="280" height="165" viewBox="0 0 280 165">
+                <defs>
+                  <linearGradient id="oppG" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ea3943"/><stop offset="25%" stopColor="#ea8c00"/>
+                    <stop offset="50%" stopColor="#c9b003"/><stop offset="75%" stopColor="#93d900"/>
+                    <stop offset="100%" stopColor="#16c784"/>
+                  </linearGradient>
+                  <filter id="oppGlow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <path d="M 25 140 A 115 115 0 0 1 255 140" fill="none" stroke="rgba(30,58,95,0.3)" strokeWidth="16" strokeLinecap="round"/>
+                <path d="M 25 140 A 115 115 0 0 1 255 140" fill="none" stroke="url(#oppG)" strokeWidth="16" strokeLinecap="round" filter="url(#oppGlow)"/>
+                {[0,20,40,60,80,100].map(tick => {
+                  const angle = (-180 + (tick/100)*180) * Math.PI / 180;
+                  return <line key={tick} x1={140+Math.cos(angle)*103} y1={140+Math.sin(angle)*103} x2={140+Math.cos(angle)*95} y2={140+Math.sin(angle)*95} stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>;
+                })}
+                <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '140px 140px', transition: 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+                  <polygon points="140,38 136,140 144,140" fill={c.color} style={{ filter: `drop-shadow(0 0 8px ${c.color})` }}/>
+                  <circle cx="140" cy="140" r="10" fill={c.color} style={{ filter: `drop-shadow(0 0 10px ${c.color})` }}/>
+                  <circle cx="140" cy="140" r="5" fill="#0f2744"/>
+                </g>
+                <text x="140" y="122" textAnchor="middle" fill={c.color} fontSize="44" fontWeight="800" fontFamily="'JetBrains Mono', monospace" style={{ filter: `drop-shadow(0 0 12px ${c.color}40)` }}>{Math.round(anim)}</text>
+                <text x="22" y="158" fill="#ea3943" fontSize="10" fontWeight="700" fontFamily="'JetBrains Mono', monospace" opacity="0.6">0</text>
+                <text x="248" y="158" fill="#16c784" fontSize="10" fontWeight="700" fontFamily="'JetBrains Mono', monospace" opacity="0.6">100</text>
               </svg>
-              <div className="text-center mt-2">
-                <div className="flex items-center justify-center gap-2"><span className="text-3xl">{c.emoji}</span><span className="text-2xl font-bold" style={{color:c.color}}>{c.label}</span></div>
-                <p className="text-sm text-gray-400 mt-1">{c.desc}</p>
-                <div className="flex items-center justify-center gap-4 mt-3">
-                  <div className="px-3 py-1 bg-[#1e3a5f] rounded-lg"><div className="text-[10px] text-gray-500">vs 30j</div><div className={`text-lg font-bold ${change>=0?'text-emerald-400':'text-red-400'}`}>{change>=0?'↑':'↓'} {Math.abs(change)}</div></div>
-                  <div className="px-3 py-1 bg-[#1e3a5f] rounded-lg"><div className="text-[10px] text-gray-500">Passé</div><div className="text-lg font-bold text-gray-300">{prevScore}</div></div>
+              <div className="text-center mt-3">
+                <div className="flex items-center justify-center gap-2.5">
+                  <span className="text-3xl animate-float">{c.emoji}</span>
+                  <span className="text-2xl font-extrabold tracking-tight" style={{ color: c.color }}>{c.label}</span>
+                </div>
+                <p className="text-sm text-gray-400 mt-1 font-medium">{c.desc}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Décomposition des facteurs</h3>
+              <div className="space-y-3">
+                {indicators.map((ind, i) => {
+                  const fc = factorColors[i] || '#3b82f6';
+                  return (
+                    <div key={i} className="glass-light rounded-xl p-3.5 transition-all hover:border-white/10" style={{ borderLeft: `3px solid ${fc}` }}>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-white">{ind.name}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: `${fc}15`, color: fc }}>{ind.weight}%</span>
+                        </div>
+                        <span className="text-sm font-black font-mono" style={{ color: fc }}>{ind.current}</span>
+                      </div>
+                      <div className="relative h-2 bg-dark-900/60 rounded-full overflow-hidden progress-bar">
+                        <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, background: `linear-gradient(90deg, ${fc}80, ${fc})` }}/>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {showDetails && (
+            <div className="mt-8 pt-6 border-t border-white/5 animate-fadeInUp">
+              <h3 className="text-base font-extrabold text-white mb-5 flex items-center gap-2">
+                <span className="text-lg">📚</span> Méthodologie de calcul
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  {n:'Fear/Greed Contrarian', w:'20%', c:'#3b82f6', i:['Logique contrarian appliquée','Peur extrême → Score élevé (opportunité)','Euphorie → Score bas (prudence)']},
+                  {n:'BTC vs ATH', w:'25%', c:'#22c55e', i:['Prix BTC actuel / ATH historique','Proche du ATH → Score élevé','Loin du ATH → Score plus bas']},
+                  {n:'Market Breadth', w:'20%', c:'#eab308', i:['% des top 50 en hausse sur 7j','Large participation = marché sain','Divergence = signal d\'alerte']},
+                  {n:'Volatilité', w:'15%', c:'#f97316', i:['Volatilité moyenne 24h du top 50','Modérée (2-5%) = optimal','Extrême = risque accru']},
+                  {n:'Momentum 30j', w:'20%', c:'#a855f7', i:['Variation moyenne 30j du top 50','Momentum positif = tendance haussière','Momentum négatif = tendance baissière']}
+                ].map((f, i) => (
+                  <div key={i} className="glass-light rounded-xl p-5 transition-all hover:border-white/10" style={{ borderLeft: `3px solid ${f.c}` }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-bold text-white text-sm">{f.n}</span>
+                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: `${f.c}15`, color: f.c }}>{f.w}</span>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {f.i.map((x, j) => (
+                        <li key={j} className="text-xs text-gray-400 flex items-start gap-2">
+                          <span className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: f.c }}/>
+                          {x}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const CryptoCard = ({ crypto: cr, rank, index }) => {
+      const [exp, setExp] = useState(false);
+      const sent = computeSentiment(cr);
+      const st = getSentimentStyle(sent);
+      const flow = computeFlow(cr.sparkline);
+
+      return (
+        <div className="glass rounded-xl p-4 card-hover cursor-pointer animate-fadeInUp"
+          style={{ animationDelay: `${Math.min(index * 0.02, 0.4)}s` }}
+          onClick={() => setExp(!exp)}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-mono font-bold text-gray-600 w-5 text-right">#{rank}</span>
+              {cr.image ? <img src={cr.image} alt={cr.sym} className="w-7 h-7 rounded-full" /> :
+                <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold">{cr.sym.charAt(0)}</div>
+              }
+              <div>
+                <div className="font-bold text-white text-sm tracking-tight">{cr.sym}</div>
+                <div className="text-[10px] text-gray-500 font-medium truncate max-w-[80px]">{cr.name}</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-white text-sm font-bold font-mono">
+                ${cr.price < 0.01 ? cr.price.toFixed(6) : cr.price < 1 ? cr.price.toFixed(4) : cr.price < 1000 ? cr.price.toFixed(2) : cr.price.toLocaleString('en-US', {maximumFractionDigits: 0})}
+              </div>
+              <div className={`text-xs font-bold font-mono ${cr.c24 >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {cr.c24 >= 0 ? '+' : ''}{(cr.c24 || 0).toFixed(2)}%
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-gray-500 font-medium">Sentiment</span>
+              <div className="flex items-center gap-2">
+                <MiniSparkline data={cr.sparkline} />
+                <span className="font-bold font-mono" style={{ color: st.color }}>{sent}</span>
+              </div>
+            </div>
+            <div className="relative h-1.5 bg-dark-900/60 rounded-full overflow-hidden">
+              <div className="absolute h-full rounded-full transition-all duration-700" style={{ width: `${sent}%`, background: `linear-gradient(90deg, ${st.color}60, ${st.color})` }}/>
+            </div>
+            <div className="flex justify-between items-center mt-1.5">
+              <Badge color={st.color}>{st.label}</Badge>
+              <span className="text-[10px] text-gray-500 font-mono">ATH: {(cr.athChange || 0).toFixed(0)}%</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs px-3 py-2 glass-light rounded-lg">
+            <span className="text-gray-500 font-medium">Trend 7j</span>
+            <span className={`font-bold font-mono ${flow >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {flow >= 0 ? '↑ Hausse' : '↓ Baisse'} <span className="text-gray-500">({flow > 0 ? '+' : ''}{flow}%)</span>
+            </span>
+          </div>
+
+          {exp && (
+            <div className="mt-3 pt-3 border-t border-white/5 space-y-3 animate-fadeInUp">
+              <div className="grid grid-cols-4 gap-2 text-center">
+                {[{l:'1H',v:cr.c1h},{l:'24H',v:cr.c24},{l:'7J',v:cr.c7},{l:'30J',v:cr.c30}].map((x, i) => (
+                  <div key={i} className="glass-light rounded-lg p-2">
+                    <div className="text-[9px] text-gray-500 font-bold uppercase">{x.l}</div>
+                    <div className={`text-xs font-black font-mono ${(x.v||0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {(x.v||0) >= 0 ? '+' : ''}{(x.v||0).toFixed(1)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="glass-light rounded-lg p-2">
+                  <div className="text-[9px] text-gray-500 font-bold uppercase">Market Cap</div>
+                  <div className="text-white font-bold font-mono">${cr.marketCap > 1e9 ? (cr.marketCap/1e9).toFixed(1)+'B' : (cr.marketCap/1e6).toFixed(0)+'M'}</div>
+                </div>
+                <div className="glass-light rounded-lg p-2">
+                  <div className="text-[9px] text-gray-500 font-bold uppercase">Volume 24h</div>
+                  <div className="text-white font-bold font-mono">${cr.volume24h > 1e9 ? (cr.volume24h/1e9).toFixed(1)+'B' : (cr.volume24h/1e6).toFixed(0)+'M'}</div>
                 </div>
               </div>
             </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-300 mb-3">Décomposition</h3>
-              <div className="space-y-3">{indicators.map((ind,i)=>{const pos=ind.current>ind.past;return(
-                <div key={i} className="bg-[#1e3a5f] rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2"><span className="text-sm text-gray-300">{ind.name}</span><div className="flex items-center gap-2"><span className="text-xs text-gray-500">{ind.weight}%</span><span className={`text-sm font-bold ${pos?'text-emerald-400':'text-red-400'}`}>{ind.current}</span></div></div>
-                  <div className="relative h-2 bg-[#0f2744] rounded-full overflow-hidden"><div className="absolute h-full w-0.5 bg-white/30 z-10" style={{left:`${ind.past}%`}}/><div className="absolute h-full rounded-full transition-all duration-1000" style={{width:`${ind.current}%`,backgroundColor:pos?'#22c55e':'#ef4444'}}/></div>
-                  <div className="flex justify-between mt-1 text-[10px]"><span className="text-gray-600">Passé: {ind.past}</span><span className={pos?'text-emerald-400':'text-red-400'}>{pos?'+':''}{ind.current-ind.past}</span></div>
+          )}
+        </div>
+      );
+    };
+
+    const Header = ({ isLive, time, stats, lastUpdate }) => (
+      <header className="mb-8 animate-fadeInUp">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-lg font-black text-white shadow-lg shadow-blue-600/20">CS</div>
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-gradient">CRYPTO SENTINEL PRO</h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <span className={`flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isLive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-400 animate-pulse' : 'bg-yellow-400'}`} style={isLive ? { boxShadow: '0 0 6px #22c55e' } : {}}/>
+                    {isLive ? 'LIVE' : 'CHARGEMENT...'}
+                  </span>
+                  <span className="text-xs text-gray-500 font-mono">{time}</span>
+                  {lastUpdate && <span className="text-[10px] text-gray-600">MAJ: {lastUpdate}</span>}
                 </div>
-              );})}</div>
+              </div>
             </div>
           </div>
-          {showDetails&&<div className="mt-6 pt-6 border-t border-[#1e3a5f]"><h3 className="text-lg font-bold text-white mb-4">📚 Méthodologie</h3><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[{n:'USDT Flow',w:'20%',c:'#3b82f6',i:['Ratio < 0.90 → 80-100','Ratio > 1.15 → 0-25']},{n:'Market Cap',w:'25%',c:'#22c55e',i:['> 95% ATH → 85-100','< 40% ATH → 0-25']},{n:'Institutionnel',w:'25%',c:'#eab308',i:['MSTR avg: $42,500','BTC > $90K → 85-100']},{n:'Gold/BTC',w:'15%',c:'#f97316',i:['Ratio ↓ > 15% → 80-100','Ratio ↑ > 15% → 0-20']},{n:'Social',w:'15%',c:'#a855f7',i:['⚠️ CONTRARIAN!','> 80% → TOP?']}].map((f,i)=>(<div key={i} className="bg-[#1e3a5f] rounded-xl p-4 border-l-4" style={{borderColor:f.c}}><div className="flex items-center justify-between mb-2"><span className="font-semibold text-white">{f.n}</span><span className="text-xs px-2 py-0.5 rounded" style={{backgroundColor:`${f.c}20`,color:f.c}}>{f.w}</span></div><ul className="text-xs text-gray-400 space-y-1">{f.i.map((x,j)=><li key={j}>{x}</li>)}</ul></div>))}</div></div>}
-        </div>
-      );
-    };
-
-    const CryptoCard = ({ crypto: cr, rank }) => {
-      const [exp, setExp] = useState(false);
-      const st = getSentimentStyle(cr.sent);
-      const ch = cr.sent - cr.sentP;
-      return (
-        <div className="bg-[#0f2744] rounded-xl p-4 border border-[#1e3a5f] hover:border-[#2a4a6f] transition-all cursor-pointer" onClick={()=>setExp(!exp)}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><span className="text-xs text-gray-600 w-6">#{rank}</span><span className="text-lg">{cr.icon}</span><div><div className="font-semibold text-white text-sm">{cr.sym}</div><div className="text-[10px] text-gray-500">{cr.name}</div></div></div>
-            <div className="text-right"><div className="text-white text-sm font-mono">${cr.price<1?cr.price.toFixed(4):cr.price.toLocaleString()}</div><div className={`text-xs font-semibold ${cr.c24>=0?'text-emerald-400':'text-red-400'}`}>{cr.c24>=0?'+':''}{cr.c24.toFixed(2)}%</div></div>
+          <div className="flex gap-2">
+            <StatChip label="Bull" value={stats.bull} color="#22c55e" />
+            <StatChip label="Neut" value={stats.neut} color="#eab308" />
+            <StatChip label="Bear" value={stats.bear} color="#ef4444" />
           </div>
-          <div className="mb-2">
-            <div className="flex items-center justify-between text-xs mb-1"><span className="text-gray-500">Sentiment</span><span className="font-semibold" style={{color:st.color}}>{st.label} ({cr.sent}/100)</span></div>
-            <div className="relative h-2 bg-[#1e3a5f] rounded-full overflow-hidden"><div className="absolute h-full w-0.5 bg-white/30" style={{left:`${cr.sentP}%`}}/><div className="absolute h-full rounded-full" style={{width:`${cr.sent}%`,backgroundColor:st.color}}/></div>
-            <div className="flex justify-between text-[10px] mt-1"><span className="text-gray-600">Passé: {cr.sentP}</span><span className={ch>=0?'text-emerald-400':'text-red-400'}>{ch>=0?'↑':'↓'} {Math.abs(ch)}</span></div>
-          </div>
-          <div className="flex items-center justify-between text-xs px-2 py-1.5 bg-[#1e3a5f] rounded-lg"><span className="text-gray-500">Exchange Flow</span><span className={`font-semibold ${cr.flow<=0?'text-emerald-400':'text-red-400'}`}>{cr.flow<=0?'↓ Accum.':'↑ Distrib.'} ({cr.flow}%)</span></div>
-          {exp&&<div className="mt-3 pt-3 border-t border-[#1e3a5f] space-y-2">
-            <div className="grid grid-cols-4 gap-2 text-center">{[{l:'24H',v:cr.c24},{l:'7J',v:cr.c7},{l:'30J',v:cr.c30},{l:'vs BTC',v:cr.vsBtc}].map((x,i)=>(<div key={i} className="bg-[#1e3a5f] rounded p-2"><div className="text-[10px] text-gray-500">{x.l}</div><div className={`text-xs font-semibold ${x.v>=0?'text-emerald-400':'text-red-400'}`}>{x.v>=0?'+':''}{x.v.toFixed(1)}%</div></div>))}</div>
-            <div className="bg-[#1e3a5f] rounded-lg p-2"><div className="text-[10px] text-gray-500 mb-1">Historique</div><div className="flex items-end gap-0.5 h-8">{cr.sH.map((v,i)=>(<div key={i} className="flex-1 rounded-t" style={{height:`${v}%`,backgroundColor:getSentimentStyle(v).color}}/>))}</div></div>
-          </div>}
         </div>
-      );
-    };
-
-    const Header = ({ isLive, time, stats }) => (
-      <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
-        <div><h1 className="text-2xl font-bold text-white">CRYPTO SENTINEL PRO</h1><div className="flex items-center gap-3 mt-1"><span className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${isLive?'bg-emerald-500/20 text-emerald-400':'bg-red-500/20 text-red-400'}`}><span className={`w-2 h-2 rounded-full ${isLive?'bg-emerald-400 animate-pulse':'bg-red-400'}`}/>{isLive?'LIVE':'OFFLINE'}</span><span className="text-sm text-gray-500">{time}</span></div></div>
-        <div className="flex gap-1 bg-[#1e3a5f] rounded-xl p-1">{[{l:'BULL',v:stats.bull,c:'#22c55e'},{l:'NEUT',v:stats.neut,c:'#eab308'},{l:'BEAR',v:stats.bear,c:'#ef4444'}].map((s,i)=>(<div key={i} className="px-4 py-2 rounded-lg text-center" style={{backgroundColor:`${s.c}15`}}><div className="text-[10px] font-semibold" style={{color:s.c}}>{s.l}</div><div className="text-xl font-bold text-white">{s.v}</div></div>))}</div>
       </header>
     );
 
     const Filters = ({ filter, setFilter, search, setSearch, sort, setSort }) => (
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-4 p-4 bg-[#0f2744] rounded-xl border border-[#1e3a5f]">
-        <div className="relative w-full lg:w-64"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span><input type="text" placeholder="Rechercher..." value={search} onChange={e=>setSearch(e.target.value)} className="w-full bg-[#1e3a5f] border border-[#2a4a6f] rounded-lg pl-10 pr-4 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"/></div>
-        <div className="flex flex-wrap gap-2">{['ALL','BULLISH','NEUTRAL','BEARISH'].map(f=>(<button key={f} onClick={()=>setFilter(f)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${filter===f?'bg-blue-600 text-white':'bg-[#1e3a5f] text-gray-400 hover:text-white'}`}>{f==='ALL'?'TOUS':f}</button>))}<select value={sort} onChange={e=>setSort(e.target.value)} className="px-3 py-2 bg-[#1e3a5f] border border-[#2a4a6f] rounded-lg text-white text-xs focus:outline-none"><option value="rank">Rang</option><option value="sentiment">Sentiment ↓</option><option value="change24h">24h ↓</option></select></div>
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-5 p-4 glass rounded-xl animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+        <div className="relative w-full lg:w-72">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </span>
+          <input type="text" placeholder="Rechercher un token..." value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full bg-dark-900/60 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium"/>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {[{k:'ALL',l:'Tous'},{k:'BULLISH',l:'Bullish'},{k:'NEUTRAL',l:'Neutre'},{k:'BEARISH',l:'Bearish'}].map(f => (
+            <button key={f.k} onClick={() => setFilter(f.k)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filter===f.k ? 'bg-blue-600/80 text-white shadow-lg shadow-blue-600/15' : 'glass-light text-gray-500 hover:text-gray-300'}`}>{f.l}</button>
+          ))}
+          <select value={sort} onChange={e => setSort(e.target.value)}
+            className="px-3 py-2 bg-dark-900/60 border border-white/5 rounded-xl text-white text-xs font-bold focus:outline-none focus:border-blue-500/50 cursor-pointer">
+            <option value="rank">Par rang</option>
+            <option value="sentiment">Sentiment ↓</option>
+            <option value="change24h">24h ↓</option>
+            <option value="volume">Volume ↓</option>
+          </select>
+        </div>
       </div>
     );
 
     // ========== MAIN APP ==========
     function App() {
-      const [isLive] = useState(true);
-      const [time, setTime] = useState(new Date().toLocaleTimeString());
-      const [cryptos, setCryptos] = useState(genTop50());
+      const [time, setTime] = useState(new Date().toLocaleTimeString('fr-FR'));
+      const [cryptos, setCryptos] = useState([]);
+      const [fgHist, setFgHist] = useState([]);
+      const [btcHist, setBtcHist] = useState([]);
       const [filter, setFilter] = useState('ALL');
       const [search, setSearch] = useState('');
       const [sort, setSort] = useState('rank');
       const [showDet, setShowDet] = useState(false);
-      const [fgHist] = useState(genFearGreedHistory());
-      const [btcHist] = useState(genBtcHistory(fgHist));
-      const fgVal = fgHist[fgHist.length-1]?.value || 26;
-      const oppScore = 68, prevOpp = 62;
-      const oppInd = [{name:'USDT Flow',current:72,past:65,weight:20},{name:'Market Cap',current:78,past:70,weight:25},{name:'Institutionnel',current:82,past:75,weight:25},{name:'Gold/BTC Ratio',current:58,past:52,weight:15},{name:'Sentiment Social',current:48,past:55,weight:15}];
-      const stats = {bull:cryptos.filter(c=>c.sent>60).length,neut:cryptos.filter(c=>c.sent>=40&&c.sent<=60).length,bear:cryptos.filter(c=>c.sent<40).length};
+      const [loading, setLoading] = useState(true);
+      const [errors, setErrors] = useState([]);
+      const [lastUpdate, setLastUpdate] = useState(null);
+      const [prevOppScore, setPrevOppScore] = useState(null);
 
-      useEffect(()=>{const int=setInterval(()=>{setTime(new Date().toLocaleTimeString());setCryptos(p=>p.map(c=>({...c,price:c.price*(1+(Math.random()-0.5)*0.002),c24:c.c24+(Math.random()-0.5)*0.05,sent:Math.round(Math.max(0,Math.min(100,c.sent+(Math.random()-0.5)*0.3)))})));},CONFIG.REFRESH_RATE);return()=>clearInterval(int);},[]);
+      const fgVal = fgHist.length > 0 ? fgHist[fgHist.length - 1].value : 0;
+      const btcCoin = cryptos.find(c => c.sym === 'BTC');
+      const btcPrice = btcCoin?.price || 0;
+      const btcAth = btcCoin?.ath || 0;
+      const oppData = cryptos.length > 0 ? computeOpportunityIndex(fgVal, cryptos, btcPrice, btcAth) : { score: 0, indicators: [] };
 
-      const filtered = cryptos.filter(c=>{if(search&&!c.sym.toLowerCase().includes(search.toLowerCase())&&!c.name.toLowerCase().includes(search.toLowerCase()))return false;if(filter==='BULLISH')return c.sent>60;if(filter==='NEUTRAL')return c.sent>=40&&c.sent<=60;if(filter==='BEARISH')return c.sent<40;return true;}).sort((a,b)=>{if(sort==='sentiment')return b.sent-a.sent;if(sort==='change24h')return b.c24-a.c24;return a.id-b.id;});
+      const stats = useMemo(() => {
+        return {
+          bull: cryptos.filter(c => computeSentiment(c) > 60).length,
+          neut: cryptos.filter(c => { const s = computeSentiment(c); return s >= 40 && s <= 60; }).length,
+          bear: cryptos.filter(c => computeSentiment(c) < 40).length,
+        };
+      }, [cryptos]);
+
+      // Fetch all data
+      const loadAllData = useCallback(async () => {
+        const newErrors = [];
+
+        // Fetch all 3 APIs in parallel
+        const [fgData, btcData, top50Data] = await Promise.all([
+          fetchFearGreedData(),
+          fetchBtcHistory(730),
+          fetchTop50(),
+        ]);
+
+        if (fgData) {
+          setFgHist(fgData);
+        } else {
+          newErrors.push('Fear & Greed Index indisponible');
+        }
+
+        if (btcData) {
+          setBtcHist(btcData);
+        } else {
+          newErrors.push('Historique BTC indisponible');
+        }
+
+        if (top50Data) {
+          setCryptos(top50Data);
+        } else {
+          newErrors.push('Données marché indisponibles');
+        }
+
+        setErrors(newErrors);
+        setLoading(false);
+        setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
+
+        // Save current opp score as previous for next refresh
+        if (top50Data && fgData) {
+          const currentFg = fgData[fgData.length - 1]?.value || 0;
+          const btc = top50Data.find(c => c.sym === 'BTC');
+          const opp = computeOpportunityIndex(currentFg, top50Data, btc?.price || 0, btc?.ath || 0);
+          setPrevOppScore(prev => prev === null ? opp.score : prev);
+        }
+      }, []);
+
+      useEffect(() => {
+        loadAllData();
+        const interval = setInterval(loadAllData, CONFIG.REFRESH_RATE);
+        return () => clearInterval(interval);
+      }, [loadAllData]);
+
+      // Update clock every second
+      useEffect(() => {
+        const clockInt = setInterval(() => setTime(new Date().toLocaleTimeString('fr-FR')), 1000);
+        return () => clearInterval(clockInt);
+      }, []);
+
+      const filtered = useMemo(() => {
+        return cryptos.filter(c => {
+          if (search && !c.sym.toLowerCase().includes(search.toLowerCase()) && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+          const sent = computeSentiment(c);
+          if (filter === 'BULLISH') return sent > 60;
+          if (filter === 'NEUTRAL') return sent >= 40 && sent <= 60;
+          if (filter === 'BEARISH') return sent < 40;
+          return true;
+        }).sort((a, b) => {
+          if (sort === 'sentiment') return computeSentiment(b) - computeSentiment(a);
+          if (sort === 'change24h') return (b.c24 || 0) - (a.c24 || 0);
+          if (sort === 'volume') return (b.volume24h || 0) - (a.volume24h || 0);
+          return a.id - b.id;
+        });
+      }, [cryptos, search, filter, sort]);
+
+      const isLive = !loading && errors.length === 0;
 
       return (
-        <div className="min-h-screen bg-[#0a1628] text-white p-4 md:p-6">
-          <div className="max-w-7xl mx-auto">
-            <Header isLive={isLive} time={time} stats={stats}/>
-            <div className="mb-6"><FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist}/></div>
-            <div className="mb-6"><OpportunityIndex score={oppScore} prevScore={prevOpp} indicators={oppInd} showDetails={showDet} setShowDetails={setShowDet}/></div>
-            <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort}/>
-            <div className="flex justify-between mb-4 text-xs text-gray-500"><span><strong className="text-white">{filtered.length}</strong> cryptos sur 50</span><span>💡 Cliquez pour détails</span></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">{filtered.map(c=><CryptoCard key={c.id} crypto={c} rank={c.id}/>)}</div>
-            <footer className="mt-8 pt-6 border-t border-[#1e3a5f] text-center text-xs text-gray-500"><p>CRYPTO SENTINEL PRO • Fear & Greed via Alternative.me</p></footer>
+        <div className="min-h-screen bg-dark-900 text-white noise-bg bg-grid">
+          <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8">
+            <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate}/>
+
+            {errors.length > 0 && errors.map((err, i) => (
+              <ErrorBanner key={i} message={err} onRetry={loadAllData} />
+            ))}
+
+            {loading ? (
+              <Loader text="Connexion aux APIs (Alternative.me + CoinGecko)..." />
+            ) : (
+              <>
+                <div className="mb-6">
+                  <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist}/>
+                </div>
+
+                <div className="mb-6">
+                  <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet}/>
+                </div>
+
+                <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort}/>
+
+                <div className="flex items-center justify-between mb-4 text-xs">
+                  <span className="text-gray-500 font-medium">
+                    <strong className="text-white font-bold font-mono">{filtered.length}</strong> cryptos sur {cryptos.length}
+                  </span>
+                  <span className="text-gray-600 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Cliquez pour les détails • Actualisation toutes les 60s
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                  {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i}/>)}
+                </div>
+              </>
+            )}
+
+            <footer className="mt-10 pt-6 border-t border-white/5 text-center">
+              <p className="text-xs text-gray-600 font-medium">
+                CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinGecko
+              </p>
+            </footer>
           </div>
         </div>
       );
