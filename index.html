@@ -107,6 +107,19 @@
       return { color: '#16c784', label: 'V.BULLISH' };
     };
 
+    // ========== RETRY HELPER ==========
+    const fetchWithRetry = async (fetchFn, retries = 3, delay = 2000) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        const result = await fetchFn();
+        if (result !== null) return result;
+        if (attempt < retries) {
+          console.warn(`Tentative ${attempt}/${retries} échouée, retry dans ${delay/1000}s...`);
+          await new Promise(r => setTimeout(r, delay * attempt));
+        }
+      }
+      return null;
+    };
+
     // ========== REAL API FETCHERS ==========
 
     // Fetch Fear & Greed Index (current + history)
@@ -115,7 +128,6 @@
         const res = await fetch(`${CONFIG.FNG_API}?limit=731&format=json&date_format=world`);
         if (!res.ok) throw new Error(`FNG API error: ${res.status}`);
         const json = await res.json();
-        // Data comes newest-first, reverse for chronological order
         const data = json.data.reverse().map(d => ({
           ts: parseInt(d.timestamp),
           value: parseInt(d.value),
@@ -960,6 +972,36 @@
       </div>
     );
 
+    // ========== DISCLAIMER POPUP ==========
+    const Disclaimer = ({ onAccept }) => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
+        <div className="glass rounded-2xl max-w-lg w-full p-8 animate-fadeInUp shadow-2xl" style={{ border: '1px solid rgba(59,130,246,0.2)' }}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-2xl shadow-lg">⚠️</div>
+            <div>
+              <h2 className="text-xl font-extrabold text-white tracking-tight">Avertissement</h2>
+              <p className="text-xs text-gray-500 font-medium">Veuillez lire attentivement avant de continuer</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 mb-6 text-sm text-gray-300 leading-relaxed">
+            <p><strong className="text-amber-400">Ce site ne constitue en aucun cas un conseil en investissement.</strong> Les informations présentées sur Crypto Sentinel Pro sont fournies à titre purement informatif et éducatif.</p>
+            <p>Les données affichées (indices de sentiment, scores d'opportunité, classements) sont générées à partir d'algorithmes propriétaires basés sur des données de marché publiques. <strong className="text-white">Aucune garantie de précision, d'exhaustivité ou de fiabilité</strong> n'est offerte.</p>
+            <p>Le marché des cryptomonnaies est <strong className="text-red-400">extrêmement volatil et risqué</strong>. Vous pouvez perdre la totalité de votre investissement. Ne prenez jamais de décision financière basée uniquement sur les informations de ce site.</p>
+            <p className="text-xs text-gray-500">En poursuivant, vous reconnaissez avoir lu et compris cet avertissement et acceptez que les créateurs de Crypto Sentinel Pro ne peuvent être tenus responsables de toute perte financière.</p>
+          </div>
+
+          <button onClick={onAccept}
+            className="w-full py-3.5 rounded-xl font-extrabold text-sm tracking-wide transition-all hover:brightness-110 active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', color: 'white', boxShadow: '0 4px 24px rgba(59,130,246,0.3)' }}>
+            J'AI LU ET J'ACCEPTE LES CONDITIONS
+          </button>
+
+          <p className="text-center text-[10px] text-gray-600 mt-3">Ce message s'affiche à chaque visite pour votre protection.</p>
+        </div>
+      </div>
+    );
+
     // ========== MAIN APP ==========
     function App() {
       const [time, setTime] = useState(new Date().toLocaleTimeString('fr-FR'));
@@ -975,6 +1017,7 @@
       const [lastUpdate, setLastUpdate] = useState(null);
       const [prevOppScore, setPrevOppScore] = useState(null);
       const [optResult, setOptResult] = useState(null);
+      const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
 
       const fgVal = fgHist.length > 0 ? fgHist[fgHist.length - 1].value : 0;
       const btcCoin = cryptos.find(c => c.sym === 'BTC');
@@ -995,11 +1038,11 @@
       const loadAllData = useCallback(async () => {
         const newErrors = [];
 
-        // Fetch all 3 APIs in parallel
+        // Fetch all 3 APIs in parallel with auto-retry
         const [fgData, btcData, top50Data] = await Promise.all([
-          fetchFearGreedData(),
-          fetchBtcHistory(730),
-          fetchCryptos(),
+          fetchWithRetry(fetchFearGreedData),
+          fetchWithRetry(() => fetchBtcHistory(730)),
+          fetchWithRetry(fetchCryptos),
         ]);
 
         if (fgData) {
@@ -1073,6 +1116,7 @@
 
       return (
         <div className="min-h-screen bg-dark-900 text-white noise-bg bg-grid">
+          {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
           <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8">
             <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate}/>
 
@@ -1110,9 +1154,12 @@
               </>
             )}
 
-            <footer className="mt-10 pt-6 border-t border-white/5 text-center">
+            <footer className="mt-10 pt-6 border-t border-white/5 text-center space-y-2">
               <p className="text-xs text-gray-600 font-medium">
                 CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinGecko
+              </p>
+              <p className="text-[10px] text-gray-700">
+                ⚠️ Ce site ne constitue pas un conseil en investissement. Les cryptomonnaies sont des actifs à haut risque.
               </p>
             </footer>
           </div>
