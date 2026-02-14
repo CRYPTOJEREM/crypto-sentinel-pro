@@ -5,7 +5,7 @@ export default function ErrorBanner({ message, onRetry }) {
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-medium hover:bg-zinc-700 transition-colors"
+          className="px-3 py-1 bg-[#26262c] text-zinc-300 rounded-lg text-xs font-medium hover:bg-[#2e2e35] transition-colors"
         >
           Réessayer
         </button>

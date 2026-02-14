@@ -22,7 +22,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
           <h2 className="text-sm font-semibold text-zinc-300">Indice d'Opportunit&eacute;</h2>
           <p className="text-[11px] text-zinc-600">Backtest 2 ans{optResult && optResult.accuracy > 0 ? ` \u2022 r=${optResult.correlation}` : ''}</p>
         </div>
-        <button onClick={() => setShowDetails(!showDetails)} className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 flex items-center gap-1">
+        <button onClick={() => setShowDetails(!showDetails)} className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all bg-[#1a1a1f] border border-[#2e2e35] text-zinc-400 hover:text-white hover:border-zinc-500 flex items-center gap-1">
           {showDetails ? 'Masquer' : 'Guide'}
           <svg className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </button>
@@ -72,11 +72,11 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
                   <span className="text-xs font-semibold font-mono" style={{ color: fc }}>{ind.current}</span>
                 </div>
               </div>
-              <div className="relative h-1 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="relative h-1 bg-[#26262c] rounded-full overflow-hidden">
                 <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, backgroundColor: fc, opacity: 0.8 }} />
               </div>
               {isExpanded && (
-                <div className="mt-2 pt-1.5 border-t border-zinc-800 animate-fadeInUp">
+                <div className="mt-2 pt-1.5 border-t border-[#26262c] animate-fadeInUp">
                   <p className="text-[11px] text-zinc-500 leading-relaxed">{interp.text}</p>
                 </div>
               )}
@@ -87,7 +87,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
 
       {/* Guide */}
       {showDetails && (
-        <div className="mt-4 pt-4 border-t border-zinc-800 animate-fadeInUp">
+        <div className="mt-4 pt-4 border-t border-[#26262c] animate-fadeInUp">
           <h3 className="text-xs font-semibold text-zinc-400 mb-3">Guide rapide</h3>
           <div className="grid grid-cols-1 gap-2">
             {[

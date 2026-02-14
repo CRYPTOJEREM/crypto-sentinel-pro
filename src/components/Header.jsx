@@ -45,7 +45,7 @@ export default function Header({ isLive, time, stats, lastUpdate, activeTab, set
       </div>
 
       {/* Navigation tabs */}
-      <nav className="flex gap-1 border-b border-zinc-800 mb-6">
+      <nav className="flex gap-1 border-b border-[#2e2e35] mb-6">
         {tabs.map((tab) => (
           <button
             key={tab.id}

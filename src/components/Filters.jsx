@@ -12,11 +12,11 @@ export default function Filters({ filter, setFilter, search, setSearch, sort, se
           placeholder="Rechercher..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-zinc-200 text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+          className="w-full bg-[#14141a] border border-[#2e2e35] rounded-lg pl-9 pr-3 py-2 text-zinc-200 text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
         />
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
+        <div className="flex bg-[#14141a] rounded-lg p-0.5 border border-[#2e2e35]">
           {[
             { k: 'ALL', l: 'Tous' },
             { k: 'BULLISH', l: 'Bullish' },
@@ -28,7 +28,7 @@ export default function Filters({ filter, setFilter, search, setSearch, sort, se
               onClick={() => setFilter(f.k)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 filter === f.k
-                  ? 'bg-zinc-700 text-white'
+                  ? 'bg-[#2e2e35] text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -39,7 +39,7 @@ export default function Filters({ filter, setFilter, search, setSearch, sort, se
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 text-xs font-medium focus:outline-none focus:border-zinc-600 cursor-pointer"
+          className="px-3 py-2 bg-[#14141a] border border-[#2e2e35] rounded-lg text-zinc-300 text-xs font-medium focus:outline-none focus:border-zinc-500 cursor-pointer"
         >
           <option value="rank">Par rang</option>
           <option value="sentiment">Sentiment</option>

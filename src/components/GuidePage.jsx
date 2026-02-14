@@ -58,7 +58,7 @@ export default function GuidePage() {
         {SECTIONS.map((section, i) => (
           <div key={i} className="card p-5">
             <div className="flex items-center gap-3 mb-4">
-              <span className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center text-xs font-semibold text-zinc-400 font-mono">{section.icon}</span>
+              <span className="w-7 h-7 rounded-lg bg-[#26262c] flex items-center justify-center text-xs font-semibold text-zinc-400 font-mono">{section.icon}</span>
               <h3 className="text-base font-semibold text-zinc-100">{section.title}</h3>
             </div>
             <div className="space-y-4">

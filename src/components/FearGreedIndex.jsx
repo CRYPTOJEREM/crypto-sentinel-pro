@@ -40,9 +40,9 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
           <h3 className="text-sm font-semibold text-zinc-300">Fear & Greed Index</h3>
           <p className="text-[11px] text-zinc-600">Source: Alternative.me</p>
         </div>
-        <div className="flex gap-0.5 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
+        <div className="flex gap-0.5 bg-[#14141a] rounded-lg p-0.5 border border-[#2e2e35]">
           {['30d', '1y', 'All'].map((r) => (
-            <button key={r} onClick={() => setRange(r)} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${range === r ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{r}</button>
+            <button key={r} onClick={() => setRange(r)} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${range === r ? 'bg-[#2e2e35] text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{r}</button>
           ))}
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
                 </div>
               );
             })}
-            <div className="text-center border-l border-zinc-800 pl-3">
+            <div className="text-center border-l border-[#2e2e35] pl-3">
               <div className="text-[10px] text-zinc-600">An. H/L</div>
               <div className="text-xs font-mono">
                 <span style={{ color: getFearGreedClass(yHigh).color }}>{yHigh}</span>
@@ -92,7 +92,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
       </div>
 
       {/* Chart */}
-      <div className="relative flex-1 min-h-[160px] bg-zinc-900/50 rounded-lg overflow-hidden border border-zinc-800/50">
+      <div className="relative flex-1 min-h-[160px] bg-[#14141a] rounded-lg overflow-hidden border border-[#26262c]">
         <div className="absolute right-2 top-0 bottom-0 flex flex-col justify-between py-2 text-[8px] font-mono z-10 text-zinc-700">
           <span>100</span><span>50</span><span>0</span>
         </div>
