@@ -36,14 +36,14 @@ body {
 .animate-spin { animation: spin 1s linear infinite; }
 
 .card {
-  background-color: #18181b;
-  border: 1px solid #3f3f46;
+  background-color: #1c1c21;
+  border: 1px solid #52525b;
   border-radius: 0.75rem;
 }
 
 .card-subtle {
-  background-color: #141417;
-  border: 1px solid #2e2e35;
+  background-color: #161619;
+  border: 1px solid #3f3f46;
   border-radius: 0.5rem;
 }
 
@@ -51,6 +51,6 @@ body {
   transition: all 0.2s ease;
 }
 .card-hover:hover {
-  border-color: #52525b;
-  background-color: #1f1f23;
+  border-color: #71717a;
+  background-color: #232328;
 }

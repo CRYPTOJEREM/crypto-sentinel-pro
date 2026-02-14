@@ -34,7 +34,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
   };
 
   return (
-    <div className="card p-5 animate-fadeInUp flex flex-col">
+    <div className="card p-6 animate-fadeInUp flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-zinc-300">Fear & Greed Index</h3>

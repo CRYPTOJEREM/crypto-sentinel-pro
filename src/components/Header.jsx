@@ -6,51 +6,51 @@ export default function Header({ isLive, time, stats, lastUpdate, activeTab, set
   ];
 
   return (
-    <header className="animate-fadeInUp">
+    <header className="py-3">
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold text-white">CS</div>
+          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-sm font-bold text-white">CS</div>
           <div>
-            <h1 className="text-base font-semibold text-white">Crypto Sentinel Pro</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight">Crypto Sentinel Pro</h1>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className={`flex items-center gap-1 text-[11px] ${isLive ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+              <span className={`flex items-center gap-1.5 text-xs ${isLive ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
                 {isLive ? 'Live' : 'Chargement...'}
               </span>
-              <span className="text-[11px] text-zinc-600 font-mono">{time}</span>
+              <span className="text-xs text-zinc-600 font-mono">{time}</span>
               {lastUpdate && lastUpdate !== 'cache' && (
-                <span className="text-[11px] text-zinc-700">MAJ {lastUpdate}</span>
+                <span className="text-xs text-zinc-700">MAJ {lastUpdate}</span>
               )}
             </div>
           </div>
         </div>
-        <div className="hidden sm:flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-xs font-semibold font-mono text-zinc-300">{stats.bull}</span>
-            <span className="text-[11px] text-zinc-600">bull</span>
+        <div className="hidden sm:flex items-center gap-5">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-sm font-semibold font-mono text-zinc-200">{stats.bull}</span>
+            <span className="text-xs text-zinc-500">bull</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-            <span className="text-xs font-semibold font-mono text-zinc-300">{stats.neut}</span>
-            <span className="text-[11px] text-zinc-600">neutre</span>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+            <span className="text-sm font-semibold font-mono text-zinc-200">{stats.neut}</span>
+            <span className="text-xs text-zinc-500">neutre</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-            <span className="text-xs font-semibold font-mono text-zinc-300">{stats.bear}</span>
-            <span className="text-[11px] text-zinc-600">bear</span>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-sm font-semibold font-mono text-zinc-200">{stats.bear}</span>
+            <span className="text-xs text-zinc-500">bear</span>
           </div>
         </div>
       </div>
 
       {/* Navigation tabs */}
-      <nav className="flex gap-1 border-b border-[#3f3f46] mb-6">
+      <nav className="flex gap-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
+            className={`px-5 py-2.5 text-sm font-medium transition-colors relative ${
               activeTab === tab.id
                 ? 'text-white'
                 : 'text-zinc-500 hover:text-zinc-300'

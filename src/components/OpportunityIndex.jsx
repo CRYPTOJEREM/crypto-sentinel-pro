@@ -16,7 +16,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
   const needleAngle = -90 + (anim / 100) * 180;
 
   return (
-    <div className="card p-5 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
+    <div className="card p-6 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-semibold text-zinc-300">Indice d'Opportunit&eacute;</h2>

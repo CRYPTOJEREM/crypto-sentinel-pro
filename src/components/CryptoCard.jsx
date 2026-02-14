@@ -11,7 +11,7 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
 
   return (
     <div
-      className="card card-hover cursor-pointer p-4 animate-fadeInUp"
+      className="card card-hover cursor-pointer p-5 animate-fadeInUp"
       style={{ animationDelay: `${Math.min(index * 0.02, 0.4)}s` }}
       onClick={() => setExp(!exp)}
     >
