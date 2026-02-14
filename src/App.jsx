@@ -127,42 +127,39 @@ export default function App() {
   const isLive = !loading && errors.length === 0 && lastUpdate !== 'cache';
 
   return (
-    <div className="min-h-screen bg-dark-900 text-white noise-bg bg-grid">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
-      <div className="relative z-10 max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8">
+      <div className="relative max-w-[1400px] mx-auto px-4 py-6 md:px-6 lg:px-8">
         <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate} />
 
         {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
 
         {loading ? (
-          <Loader text="Connexion aux APIs (Alternative.me + CoinGecko)..." />
+          <Loader text="Connexion aux APIs..." />
         ) : (
           <>
-            <div className="mb-6">
+            <div className="mb-8">
               <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
             </div>
-            <div className="mb-6">
+            <div className="mb-8">
               <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
             </div>
             <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
-            <div className="flex items-center justify-between mb-4 text-xs">
-              <span className="text-gray-500 font-medium">
-                <strong className="text-white font-bold font-mono">{filtered.length}</strong> cryptos sur {cryptos.length}
+            <div className="flex items-center justify-between mb-4 text-sm">
+              <span className="text-zinc-500">
+                <span className="text-zinc-200 font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
               </span>
-              <span className="text-gray-600 flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Cliquez pour les détails • Actualisation toutes les 120s
-              </span>
+              <span className="text-zinc-600 text-xs">Actualisation toutes les 120s</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
               {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
             </div>
           </>
         )}
 
-        <footer className="mt-10 pt-6 border-t border-white/5 text-center space-y-2">
-          <p className="text-xs text-gray-600 font-medium">CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinGecko</p>
-          <p className="text-[10px] text-gray-700">⚠️ Ce site ne constitue pas un conseil en investissement. Les cryptomonnaies sont des actifs à haut risque.</p>
+        <footer className="mt-12 pt-6 border-t border-zinc-800/50 text-center space-y-1">
+          <p className="text-xs text-zinc-600">Crypto Sentinel Pro — Donn&eacute;es via Alternative.me & CoinCap</p>
+          <p className="text-[10px] text-zinc-700">Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </div>
     </div>

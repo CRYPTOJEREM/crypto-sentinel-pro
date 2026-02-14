@@ -17,7 +17,7 @@ export default function MiniSparkline({ data, width = 60, height = 24 }) {
       .join(' ');
     const lastVal = sampled[sampled.length - 1];
     const firstVal = sampled[0];
-    const color = lastVal >= firstVal ? '#16c784' : '#ea3943';
+    const color = lastVal >= firstVal ? '#22c55e' : '#ef4444';
     const ly = height - ((lastVal - min) / range) * (height - 2) - 1;
     return { points: pts, lineColor: color, lastY: ly };
   }, [data, width, height]);
