@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --open",
-    "build": "vite build && cp docs/index.html . && cp -r docs/assets .",
+    "build": "cp index.dev.html index.html && vite build && cp docs/index.html . && cp -r docs/assets .",
     "lint": "eslint .",
     "preview": "vite preview"
   },
