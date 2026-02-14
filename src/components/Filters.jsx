@@ -1,6 +1,6 @@
 export default function Filters({ filter, setFilter, search, setSearch, sort, setSort }) {
   return (
-    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5 p-3 card animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5 p-3 bg-card border border-card-border rounded-xl animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
       <div className="relative w-full lg:w-64">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -12,11 +12,11 @@ export default function Filters({ filter, setFilter, search, setSearch, sort, se
           placeholder="Rechercher..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#111113] border border-[#3f3f46] rounded-lg pl-9 pr-3 py-2 text-zinc-200 text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+          className="w-full bg-surface border border-card-border rounded-lg pl-9 pr-3 py-2 text-zinc-200 text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
         />
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex bg-[#111113] rounded-lg p-0.5 border border-[#3f3f46]">
+        <div className="flex bg-surface rounded-lg p-0.5 border border-card-border">
           {[
             { k: 'ALL', l: 'Tous' },
             { k: 'BULLISH', l: 'Bullish' },
@@ -28,7 +28,7 @@ export default function Filters({ filter, setFilter, search, setSearch, sort, se
               onClick={() => setFilter(f.k)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 filter === f.k
-                  ? 'bg-[#3f3f46] text-white'
+                  ? 'bg-card-border text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
@@ -39,7 +39,7 @@ export default function Filters({ filter, setFilter, search, setSearch, sort, se
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="px-3 py-2 bg-[#111113] border border-[#3f3f46] rounded-lg text-zinc-300 text-xs font-medium focus:outline-none focus:border-zinc-500 cursor-pointer"
+          className="px-3 py-2 bg-surface border border-card-border rounded-lg text-zinc-300 text-xs font-medium focus:outline-none focus:border-zinc-500 cursor-pointer"
         >
           <option value="rank">Par rang</option>
           <option value="sentiment">Sentiment</option>

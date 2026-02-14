@@ -16,13 +16,13 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
   const needleAngle = -90 + (anim / 100) * 180;
 
   return (
-    <div className="card p-6 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
+    <div className="bg-card border border-card-border rounded-xl p-6 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-semibold text-zinc-300">Indice d'Opportunit&eacute;</h2>
           <p className="text-[11px] text-zinc-600">Backtest 2 ans{optResult && optResult.accuracy > 0 ? ` \u2022 r=${optResult.correlation}` : ''}</p>
         </div>
-        <button onClick={() => setShowDetails(!showDetails)} className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all bg-[#18181b] border border-[#3f3f46] text-zinc-400 hover:text-white hover:border-zinc-500 flex items-center gap-1">
+        <button onClick={() => setShowDetails(!showDetails)} className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all bg-card border border-card-border text-zinc-400 hover:text-white hover:border-zinc-500 flex items-center gap-1">
           {showDetails ? 'Masquer' : 'Guide'}
           <svg className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </button>
@@ -60,7 +60,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
           const interp = getFactorInterpretation(ind.name, ind.current);
           const isExpanded = expandedFactor === i;
           return (
-            <div key={i} className="card-subtle rounded-lg p-2.5 cursor-pointer transition-all hover:border-zinc-600" onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
+            <div key={i} className="bg-surface border border-surface-border rounded-lg p-2.5 cursor-pointer transition-all hover:border-zinc-600" onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: fc }} />
@@ -72,11 +72,11 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
                   <span className="text-xs font-semibold font-mono" style={{ color: fc }}>{ind.current}</span>
                 </div>
               </div>
-              <div className="relative h-1 bg-[#27272a] rounded-full overflow-hidden">
+              <div className="relative h-1 bg-surface rounded-full overflow-hidden">
                 <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, backgroundColor: fc, opacity: 0.8 }} />
               </div>
               {isExpanded && (
-                <div className="mt-2 pt-1.5 border-t border-[#333338] animate-fadeInUp">
+                <div className="mt-2 pt-1.5 border-t border-surface-border animate-fadeInUp">
                   <p className="text-[11px] text-zinc-500 leading-relaxed">{interp.text}</p>
                 </div>
               )}
@@ -87,7 +87,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
 
       {/* Guide */}
       {showDetails && (
-        <div className="mt-4 pt-4 border-t border-[#333338] animate-fadeInUp">
+        <div className="mt-4 pt-4 border-t border-surface-border animate-fadeInUp">
           <h3 className="text-xs font-semibold text-zinc-400 mb-3">Guide rapide</h3>
           <div className="grid grid-cols-1 gap-2">
             {[

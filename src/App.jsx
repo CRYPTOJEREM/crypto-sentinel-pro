@@ -130,18 +130,18 @@ export default function App() {
   const isLive = !loading && errors.length === 0 && lastUpdate !== 'cache';
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100">
+    <div className="min-h-screen bg-[#0a0a12] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
 
       {/* Header sticky */}
-      <div className="sticky top-0 z-40 bg-[#09090b]/95 backdrop-blur-sm border-b border-[#27272a]">
-        <div className="w-full max-w-[1280px] mx-auto px-6 md:px-10 lg:px-16">
+      <div className="sticky top-0 z-40 bg-[#0a0a12]/95 backdrop-blur-md border-b border-card-border">
+        <div className="w-full max-w-6xl mx-auto px-8 md:px-12 lg:px-16">
           <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate} activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
 
       {/* Content */}
-      <div className="w-full max-w-[1280px] mx-auto px-6 py-8 md:px-10 lg:px-16">
+      <div className="w-full max-w-6xl mx-auto px-8 py-10 md:px-12 lg:px-16">
         {activeTab === 'dashboard' && (
           <>
             {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
@@ -150,21 +150,21 @@ export default function App() {
               <Loader text="Connexion aux APIs..." />
             ) : (
               <>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-10">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
                   <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
                   <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
                 </div>
 
                 <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
 
-                <div className="flex items-center justify-between mb-5 text-sm">
-                  <span className="text-zinc-500">
-                    <span className="text-zinc-200 font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
+                <div className="flex items-center justify-between mb-6 text-sm">
+                  <span className="text-zinc-400">
+                    <span className="text-white font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
                   </span>
-                  <span className="text-zinc-600 text-xs">Actualisation toutes les 120s</span>
+                  <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
                 </div>
               </>
@@ -175,9 +175,9 @@ export default function App() {
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
 
-        <footer className="mt-16 pt-8 border-t border-[#27272a] text-center space-y-1 pb-8">
-          <p className="text-xs text-zinc-600">Crypto Sentinel Pro v2.1 &mdash; Donn&eacute;es via Alternative.me &amp; CoinCap</p>
-          <p className="text-[10px] text-zinc-700">Ce site ne constitue pas un conseil en investissement.</p>
+        <footer className="mt-20 pt-8 border-t border-card-border text-center space-y-2 pb-10">
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.1</p>
+          <p className="text-xs text-zinc-600">Donn&eacute;es via Alternative.me &amp; CoinCap &mdash; Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </div>
     </div>

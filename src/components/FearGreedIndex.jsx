@@ -6,7 +6,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
   const [range, setRange] = useState('1y');
 
   if (!history || history.length === 0)
-    return <div className="card p-6"><Loader text="Chargement Fear & Greed..." /></div>;
+    return <div className="bg-card border border-card-border rounded-xl p-6"><Loader text="Chargement Fear & Greed..." /></div>;
 
   const c = getFearGreedClass(value);
   const yesterday = history[history.length - 2]?.value || 0;
@@ -40,9 +40,9 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
           <h3 className="text-sm font-semibold text-zinc-300">Fear & Greed Index</h3>
           <p className="text-[11px] text-zinc-600">Source: Alternative.me</p>
         </div>
-        <div className="flex gap-0.5 bg-[#111113] rounded-lg p-0.5 border border-[#3f3f46]">
+        <div className="flex gap-0.5 bg-surface rounded-lg p-0.5 border border-card-border">
           {['30d', '1y', 'All'].map((r) => (
-            <button key={r} onClick={() => setRange(r)} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${range === r ? 'bg-[#3f3f46] text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{r}</button>
+            <button key={r} onClick={() => setRange(r)} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${range === r ? 'bg-card-border text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{r}</button>
           ))}
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
                 </div>
               );
             })}
-            <div className="text-center border-l border-[#3f3f46] pl-3">
+            <div className="text-center border-l border-card-border pl-3">
               <div className="text-[10px] text-zinc-600">An. H/L</div>
               <div className="text-xs font-mono">
                 <span style={{ color: getFearGreedClass(yHigh).color }}>{yHigh}</span>
@@ -92,7 +92,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
       </div>
 
       {/* Chart */}
-      <div className="relative flex-1 min-h-[160px] bg-[#111113] rounded-lg overflow-hidden border border-[#333338]">
+      <div className="relative flex-1 min-h-[160px] bg-surface rounded-lg overflow-hidden border border-surface-border">
         <div className="absolute right-2 top-0 bottom-0 flex flex-col justify-between py-2 text-[8px] font-mono z-10 text-zinc-700">
           <span>100</span><span>50</span><span>0</span>
         </div>

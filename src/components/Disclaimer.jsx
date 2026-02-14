@@ -4,7 +4,7 @@ export default function Disclaimer({ onAccept }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
     >
-      <div className="card max-w-lg w-full p-8 animate-fadeInUp">
+      <div className="bg-card border border-card-border rounded-xl max-w-lg w-full p-8 animate-fadeInUp">
         <h2 className="text-lg font-semibold text-white mb-1">Avertissement</h2>
         <p className="text-xs text-zinc-500 mb-5">Veuillez lire attentivement avant de continuer</p>
 
