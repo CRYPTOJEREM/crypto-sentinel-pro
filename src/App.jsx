@@ -135,7 +135,7 @@ export default function App() {
         {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
 
         {loading ? (
-          <Loader text="Connexion aux APIs (Alternative.me + CoinCap)..." />
+          <Loader text="Connexion aux APIs (Alternative.me + CoinGecko)..." />
         ) : (
           <>
             <div className="mb-6">
@@ -151,7 +151,7 @@ export default function App() {
               </span>
               <span className="text-gray-600 flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Cliquez pour les détails • Actualisation toutes les 60s
+                Cliquez pour les détails • Actualisation toutes les 120s
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
@@ -161,7 +161,7 @@ export default function App() {
         )}
 
         <footer className="mt-10 pt-6 border-t border-white/5 text-center space-y-2">
-          <p className="text-xs text-gray-600 font-medium">CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinCap</p>
+          <p className="text-xs text-gray-600 font-medium">CRYPTO SENTINEL PRO <span className="text-gray-700">•</span> Données réelles via Alternative.me & CoinGecko</p>
           <p className="text-[10px] text-gray-700">⚠️ Ce site ne constitue pas un conseil en investissement. Les cryptomonnaies sont des actifs à haut risque.</p>
         </footer>
       </div>

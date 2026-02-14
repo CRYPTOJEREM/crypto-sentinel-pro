@@ -1,18 +1,20 @@
 import { CONFIG } from './config';
 import { saveCache } from './cache';
 
-const fetchWithRetry = async (fetchFn, retries = 2, delay = 3000) => {
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const fetchWithRetry = async (fetchFn, retries = 2, delay = 4000) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     const result = await fetchFn();
     if (result !== null) return result;
     if (attempt < retries) {
-      console.warn(`Tentative ${attempt}/${retries} échouée, retry dans ${delay / 1000}s...`);
       await new Promise((r) => setTimeout(r, delay * attempt));
     }
   }
   return null;
 };
 
+// Fear & Greed — Alternative.me (fiable, pas de limite)
 export const fetchFearGreedData = async () => {
   try {
     const res = await fetch(`${CONFIG.FNG_API}?limit=731&format=json&date_format=world`);
@@ -32,17 +34,13 @@ export const fetchFearGreedData = async () => {
   }
 };
 
+// BTC History — CoinGecko
 export const fetchBtcHistory = async () => {
   try {
-    const end = Date.now();
-    const start = end - 730 * 24 * 60 * 60 * 1000;
-    const res = await fetch(`${CONFIG.COINCAP_API}/assets/bitcoin/history?interval=d1&start=${start}&end=${end}`);
-    if (!res.ok) throw new Error(`CoinCap BTC history error: ${res.status}`);
+    const res = await fetch(`${CONFIG.COINGECKO_API}/coins/bitcoin/market_chart?vs_currency=usd&days=730&interval=daily`);
+    if (!res.ok) throw new Error(`BTC history error: ${res.status}`);
     const json = await res.json();
-    const data = json.data.map((d) => ({
-      ts: Math.floor(d.time / 1000),
-      price: parseFloat(d.priceUsd),
-    }));
+    const data = json.prices.map(([ts, price]) => ({ ts: Math.floor(ts / 1000), price }));
     saveCache('btc', data);
     return data;
   } catch (err) {
@@ -51,31 +49,31 @@ export const fetchBtcHistory = async () => {
   }
 };
 
+// Top 100 cryptos — CoinGecko (single page)
 export const fetchCryptos = async () => {
   try {
-    const res = await fetch(`${CONFIG.COINCAP_API}/assets?limit=100`);
-    if (!res.ok) throw new Error(`CoinCap assets error: ${res.status}`);
-    const json = await res.json();
-    if (!json.data || !Array.isArray(json.data)) throw new Error('Invalid response format');
-    const data = json.data.map((coin, i) => ({
+    const url = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Markets error: ${res.status}`);
+    const coins = await res.json();
+    if (!Array.isArray(coins)) throw new Error('Invalid format');
+    const data = coins.map((coin, i) => ({
       id: i + 1,
       cgId: coin.id,
-      sym: coin.symbol,
+      sym: coin.symbol.toUpperCase(),
       name: coin.name,
-      image: `https://assets.coincap.io/assets/icons/${coin.symbol.toLowerCase()}@2x.png`,
-      price: parseFloat(coin.priceUsd) || 0,
-      marketCap: parseFloat(coin.marketCapUsd) || 0,
-      volume24h: parseFloat(coin.volumeUsd24Hr) || 0,
-      c24: parseFloat(coin.changePercent24Hr) || 0,
-      c7: 0,
-      c30: 0,
-      c1h: 0,
-      ath: 0,
-      athChange: 0,
-      sparkline: [],
-      vwap24Hr: parseFloat(coin.vwap24Hr) || 0,
-      supply: parseFloat(coin.supply) || 0,
-      maxSupply: parseFloat(coin.maxSupply) || 0,
+      image: coin.image,
+      price: coin.current_price || 0,
+      marketCap: coin.market_cap || 0,
+      volume24h: coin.total_volume || 0,
+      c1h: coin.price_change_percentage_1h_in_currency || 0,
+      c24: coin.price_change_percentage_24h || 0,
+      c7: coin.price_change_percentage_7d_in_currency || 0,
+      c30: coin.price_change_percentage_30d_in_currency || 0,
+      ath: coin.ath || 0,
+      athChange: coin.ath_change_percentage || 0,
+      sparkline: coin.sparkline_in_7d?.price || [],
+      vwap24Hr: 0,
     }));
     saveCache('cryptos', data);
     return data;
@@ -85,53 +83,18 @@ export const fetchCryptos = async () => {
   }
 };
 
-export const enrichCryptosWithHistory = async (cryptos) => {
-  if (!cryptos || cryptos.length === 0) return cryptos;
-  const end = Date.now();
-  const start30d = end - 30 * 24 * 60 * 60 * 1000;
-  const topIds = cryptos.slice(0, 20).map((c) => c.cgId);
-  const enriched = [...cryptos];
-
-  for (let idx = 0; idx < topIds.length; idx++) {
-    try {
-      const res = await fetch(`${CONFIG.COINCAP_API}/assets/${topIds[idx]}/history?interval=d1&start=${start30d}&end=${end}`);
-      if (!res.ok) continue;
-      const json = await res.json();
-      if (!json.data || json.data.length < 2) continue;
-
-      const prices = json.data.map((d) => parseFloat(d.priceUsd));
-      const currentPrice = prices[prices.length - 1];
-      const price7dAgo = prices.length >= 7 ? prices[prices.length - 7] : prices[0];
-      const price30dAgo = prices[0];
-
-      enriched[idx].c7 = ((currentPrice - price7dAgo) / price7dAgo) * 100;
-      enriched[idx].c30 = ((currentPrice - price30dAgo) / price30dAgo) * 100;
-      enriched[idx].sparkline = prices.slice(-7);
-
-      const maxPrice = Math.max(...prices);
-      enriched[idx].ath = maxPrice;
-      enriched[idx].athChange = ((currentPrice - maxPrice) / maxPrice) * 100;
-    } catch (e) {
-      /* skip */
-    }
-  }
-
-  saveCache('cryptos', enriched);
-  return enriched;
-};
-
+// Sequential loading — staggers CoinGecko calls to avoid rate limit
 export const loadAllData = async (isFirstLoad, setCryptos) => {
-  const [fgData, cryptoData, btcData] = await Promise.all([
-    fetchWithRetry(fetchFearGreedData),
-    fetchWithRetry(fetchCryptos),
-    fetchWithRetry(fetchBtcHistory),
-  ]);
+  // 1. Fear & Greed (different API, no rate issue)
+  const fgData = await fetchWithRetry(fetchFearGreedData);
 
-  if (cryptoData && isFirstLoad && setCryptos) {
-    enrichCryptosWithHistory(cryptoData).then((enriched) => {
-      if (enriched) setCryptos(enriched);
-    });
-  }
+  // 2. Wait then fetch cryptos
+  await wait(1500);
+  const cryptoData = await fetchWithRetry(fetchCryptos);
+
+  // 3. Wait then fetch BTC history
+  await wait(2000);
+  const btcData = await fetchWithRetry(fetchBtcHistory);
 
   return { fgData, cryptoData, btcData };
 };
