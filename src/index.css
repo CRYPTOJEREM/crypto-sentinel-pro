@@ -10,7 +10,7 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #0c0c0f;
+  background-color: #09090b;
   color: #e4e4e7;
   overflow-x: hidden;
   min-height: 100vh;
@@ -19,7 +19,7 @@ body {
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0c0c0f; }
+::-webkit-scrollbar-track { background: #09090b; }
 ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; }
 ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
@@ -36,14 +36,14 @@ body {
 .animate-spin { animation: spin 1s linear infinite; }
 
 .card {
-  background-color: #1a1a1f;
-  border: 1px solid #2e2e35;
+  background-color: #18181b;
+  border: 1px solid #3f3f46;
   border-radius: 0.75rem;
 }
 
 .card-subtle {
-  background-color: #16161a;
-  border: 1px solid #26262c;
+  background-color: #141417;
+  border: 1px solid #2e2e35;
   border-radius: 0.5rem;
 }
 
@@ -51,6 +51,6 @@ body {
   transition: all 0.2s ease;
 }
 .card-hover:hover {
-  border-color: #3f3f46;
-  background-color: #1f1f25;
+  border-color: #52525b;
+  background-color: #1f1f23;
 }

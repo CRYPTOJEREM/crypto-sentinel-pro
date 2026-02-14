@@ -130,7 +130,7 @@ export default function App() {
   const isLive = !loading && errors.length === 0 && lastUpdate !== 'cache';
 
   return (
-    <div className="min-h-screen bg-[#0c0c0f] text-zinc-100">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
 
       <div className="w-full max-w-[1400px] mx-auto px-4 py-6 md:px-8 lg:px-12">
@@ -169,7 +169,7 @@ export default function App() {
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
 
-        <footer className="mt-12 pt-6 border-t border-[#26262c] text-center space-y-1">
+        <footer className="mt-12 pt-6 border-t border-[#3f3f46] text-center space-y-1">
           <p className="text-xs text-zinc-600">Crypto Sentinel Pro v2.1 &mdash; Donn&eacute;es via Alternative.me &amp; CoinCap</p>
           <p className="text-[10px] text-zinc-700">Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
