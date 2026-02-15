@@ -22,6 +22,7 @@ import PricingPage from './components/PricingPage';
 import AuthModal from './components/AuthModal';
 import BlurOverlay from './components/BlurOverlay';
 import AlertBanner from './components/AlertBanner';
+import IndicatorPage from './components/IndicatorPage';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -212,6 +213,11 @@ export default function App() {
           </>
         )}
 
+        {activeTab === 'indicator' && (
+          <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
+            <IndicatorPage oppScore={oppData.score} indicators={oppData.indicators} fgValue={fgVal} />
+          </BlurOverlay>
+        )}
         {activeTab === 'pricing' && <PricingPage userRole={user?.role || null} onLoginClick={() => setShowAuthModal(true)} />}
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
