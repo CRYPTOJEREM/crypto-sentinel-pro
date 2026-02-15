@@ -1,5 +1,17 @@
 const UPDATES = [
   {
+    version: '2.5.0',
+    date: '15 Fev 2025',
+    title: 'RSI(6) & TradingView',
+    changes: [
+      'Nouvel onglet Indicateur avec graphique TradingView interactif',
+      'RSI(6) comme 6eme facteur de l\'algorithme (zone 60-64 = continuation haussiere)',
+      'Selecteur de crypto avec analyse RSI en temps reel',
+      'Jauge RSI visuelle avec zones colorees (surachat, survente, continuation)',
+      'Widget TradingView avec RSI(6) pre-charge en interval 4H',
+    ],
+  },
+  {
     version: '2.4.0',
     date: '15 Fév 2025',
     title: 'Alertes & Historique Opportunité',

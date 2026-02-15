@@ -215,7 +215,7 @@ export default function App() {
 
         {activeTab === 'indicator' && (
           <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
-            <IndicatorPage oppScore={oppData.score} indicators={oppData.indicators} fgValue={fgVal} />
+            <IndicatorPage oppScore={oppData.score} indicators={oppData.indicators} fgValue={fgVal} cryptos={cryptos} />
           </BlurOverlay>
         )}
         {activeTab === 'pricing' && <PricingPage userRole={user?.role || null} onLoginClick={() => setShowAuthModal(true)} />}
@@ -223,7 +223,7 @@ export default function App() {
         {activeTab === 'guide' && <GuidePage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
-          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.4</p>
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.5</p>
           <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinGecko — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>
