@@ -6,6 +6,7 @@ const ROLE_BADGE = {
 
 export default function Header({ isLive, time, stats, lastUpdate, activeTab, setActiveTab, user, onLoginClick, onLogout }) {
   const tabs = [
+    { id: 'home', label: 'Accueil' },
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'indicator', label: 'Radar' },
     { id: 'pricing', label: 'Tarifs' },

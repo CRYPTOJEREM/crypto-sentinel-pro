@@ -23,9 +23,10 @@ import AuthModal from './components/AuthModal';
 import BlurOverlay from './components/BlurOverlay';
 import AlertBanner from './components/AlertBanner';
 import IndicatorPage from './components/IndicatorPage';
+import LandingPage from './components/LandingPage';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('home');
   const [time, setTime] = useState(new Date().toLocaleTimeString('fr-FR'));
   const [cryptos, setCryptos] = useState([]);
   const [fgHist, setFgHist] = useState([]);
@@ -179,6 +180,14 @@ export default function App() {
       </header>
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-6">
+        {activeTab === 'home' && (
+          <LandingPage
+            onStart={() => isAuthenticated ? setActiveTab('dashboard') : setShowAuthModal(true)}
+            onPricing={goToPricing}
+            isLoggedIn={isAuthenticated}
+          />
+        )}
+
         {activeTab === 'dashboard' && (
           <>
             {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
@@ -223,7 +232,7 @@ export default function App() {
         {activeTab === 'guide' && <GuidePage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
-          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.7</p>
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.8</p>
           <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinGecko — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>

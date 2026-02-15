@@ -1,5 +1,16 @@
 const UPDATES = [
   {
+    version: '2.8.0',
+    date: '15 Fev 2026',
+    title: 'Page d\'accueil marketing',
+    changes: [
+      'Nouvelle page d\'accueil style Apple avec presentation du produit',
+      'Hero, features, fonctionnement, chiffres cles et CTA',
+      'Page d\'accueil comme onglet par defaut a l\'arrivee sur le site',
+      'Onglet Accueil ajoute dans la navigation',
+    ],
+  },
+  {
     version: '2.7.0',
     date: '15 Fev 2026',
     title: 'Scanner Bitunix Perpetual',
