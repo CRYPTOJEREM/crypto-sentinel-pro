@@ -11,7 +11,7 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
 
   return (
     <div
-      className="bg-card border border-card-border rounded-xl p-5 cursor-pointer transition-all duration-200 hover:bg-card-hover hover:border-card-border-hover animate-fadeInUp"
+      className="bg-card border border-card-border rounded-xl p-4 cursor-pointer transition-all duration-200 hover:bg-card-hover hover:border-card-border-hover animate-fadeInUp overflow-hidden min-w-0"
       style={{ animationDelay: `${Math.min(index * 0.02, 0.4)}s` }}
       onClick={() => setExp(!exp)}
     >
