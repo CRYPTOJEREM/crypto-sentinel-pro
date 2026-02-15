@@ -16,21 +16,20 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
   const needleAngle = -90 + (anim / 100) * 180;
 
   return (
-    <div className="bg-card border border-card-border rounded-xl p-6 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
+    <div className="bg-[#16162a] border border-[#2a2a45] rounded-xl p-5 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-300">Indice d'Opportunit&eacute;</h2>
+          <h2 className="text-sm font-semibold text-zinc-300">Indice d'Opportunité</h2>
           <p className="text-[11px] text-zinc-600">Backtest 2 ans{optResult && optResult.accuracy > 0 ? ` \u2022 r=${optResult.correlation}` : ''}</p>
         </div>
-        <button onClick={() => setShowDetails(!showDetails)} className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all bg-card border border-card-border text-zinc-400 hover:text-white hover:border-zinc-500 flex items-center gap-1">
+        <button onClick={() => setShowDetails(!showDetails)} className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all bg-[#16162a] border border-[#2a2a45] text-zinc-400 hover:text-white hover:border-zinc-500 flex items-center gap-1">
           {showDetails ? 'Masquer' : 'Guide'}
           <svg className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </button>
       </div>
 
-      {/* Gauge + Label */}
-      <div className="flex items-center gap-5 mb-4">
-        <svg width="140" height="90" viewBox="0 0 140 90" className="flex-shrink-0">
+      <div className="flex items-center gap-4 mb-4">
+        <svg width="120" height="78" viewBox="0 0 140 90" className="shrink-0">
           <defs>
             <linearGradient id="oppG" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#ef4444" /><stop offset="25%" stopColor="#f97316" />
@@ -53,14 +52,13 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
         </div>
       </div>
 
-      {/* Factors */}
       <div className="flex-1 space-y-1.5">
         {indicators.map((ind, i) => {
           const fc = FACTOR_COLORS[i] || '#3b82f6';
           const interp = getFactorInterpretation(ind.name, ind.current);
           const isExpanded = expandedFactor === i;
           return (
-            <div key={i} className="bg-surface border border-surface-border rounded-lg p-2.5 cursor-pointer transition-all hover:border-zinc-600" onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
+            <div key={i} className="bg-[#111122] border border-[#222238] rounded-lg p-2.5 cursor-pointer transition-all hover:border-zinc-600" onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: fc }} />
@@ -72,11 +70,11 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
                   <span className="text-xs font-semibold font-mono" style={{ color: fc }}>{ind.current}</span>
                 </div>
               </div>
-              <div className="relative h-1 bg-surface rounded-full overflow-hidden">
+              <div className="relative h-1 bg-[#0b0b14] rounded-full overflow-hidden">
                 <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, backgroundColor: fc, opacity: 0.8 }} />
               </div>
               {isExpanded && (
-                <div className="mt-2 pt-1.5 border-t border-surface-border animate-fadeInUp">
+                <div className="mt-2 pt-1.5 border-t border-[#222238] animate-fadeInUp">
                   <p className="text-[11px] text-zinc-500 leading-relaxed">{interp.text}</p>
                 </div>
               )}
@@ -85,20 +83,19 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
         })}
       </div>
 
-      {/* Guide */}
       {showDetails && (
-        <div className="mt-4 pt-4 border-t border-surface-border animate-fadeInUp">
+        <div className="mt-4 pt-4 border-t border-[#222238] animate-fadeInUp">
           <h3 className="text-xs font-semibold text-zinc-400 mb-3">Guide rapide</h3>
           <div className="grid grid-cols-1 gap-2">
             {[
-              { n: 'F&G Contrarian', t: 'Peur = opportunit\u00e9, Euphorie = prudence' },
-              { n: 'BTC vs ATH', t: 'Proche du record = march\u00e9 en force' },
-              { n: 'Market Breadth', t: 'Large participation = march\u00e9 sain' },
-              { n: 'Volatilit\u00e9', t: 'Mod\u00e9r\u00e9e = conditions id\u00e9ales' },
-              { n: 'Momentum 30j', t: 'Tendance haussi\u00e8re = signal positif' },
+              { n: 'F&G Contrarian', t: 'Peur = opportunité, Euphorie = prudence' },
+              { n: 'BTC vs ATH', t: 'Proche du record = marché en force' },
+              { n: 'Market Breadth', t: 'Large participation = marché sain' },
+              { n: 'Volatilité', t: 'Modérée = conditions idéales' },
+              { n: 'Momentum 30j', t: 'Tendance haussière = signal positif' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-2 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: FACTOR_COLORS[i] }} />
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: FACTOR_COLORS[i] }} />
                 <span className="text-zinc-400 font-medium">{f.n}:</span>
                 <span className="text-zinc-600">{f.t}</span>
               </div>

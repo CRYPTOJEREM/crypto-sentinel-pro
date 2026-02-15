@@ -130,18 +130,16 @@ export default function App() {
   const isLive = !loading && errors.length === 0 && lastUpdate !== 'cache';
 
   return (
-    <div className="min-h-screen bg-[#0a0a12] text-zinc-100">
+    <div className="min-h-screen bg-[#0b0b14] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
 
-      {/* Header sticky */}
-      <header className="sticky top-0 z-40 bg-[#0a0a12]/95 backdrop-blur-md border-b border-card-border">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate} activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6">
         {activeTab === 'dashboard' && (
           <>
             {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
@@ -150,22 +148,20 @@ export default function App() {
               <Loader text="Connexion aux APIs..." />
             ) : (
               <>
-                {/* Gauges side by side */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                   <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
                   <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
                 </div>
 
                 <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
 
-                <div className="flex items-center justify-between mb-5 text-sm">
+                <div className="flex items-center justify-between mb-4 text-sm">
                   <span className="text-zinc-400">
                     <span className="text-white font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
                   </span>
                   <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
                 </div>
 
-                {/* Crypto cards grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
                 </div>
@@ -177,9 +173,9 @@ export default function App() {
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
 
-        <footer className="mt-16 pt-8 border-t border-card-border text-center space-y-2 pb-8">
+        <footer className="mt-16 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
           <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.1</p>
-          <p className="text-xs text-zinc-600">Donn&eacute;es via Alternative.me &amp; CoinCap &mdash; Ce site ne constitue pas un conseil en investissement.</p>
+          <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinCap — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>
     </div>

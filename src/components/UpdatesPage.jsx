@@ -57,7 +57,7 @@ export default function UpdatesPage() {
 
       <div className="space-y-6">
         {UPDATES.map((update, i) => (
-          <div key={i} className="bg-card border border-card-border rounded-xl p-5">
+          <div key={i} className="bg-[#16162a] border border-[#2a2a45] rounded-xl p-5">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
