@@ -1,5 +1,28 @@
 const UPDATES = [
   {
+    version: '2.4.0',
+    date: '15 Fév 2025',
+    title: 'Alertes & Historique Opportunité',
+    changes: [
+      'Alertes browser : notification quand le score franchit un seuil (achat/prudence)',
+      'Configuration des seuils d\'alerte (par défaut 70/30)',
+      'Historique graphique de l\'Indice d\'Opportunité avec zones colorées',
+      'Sélecteur de période historique (7j, 30j, Tout)',
+      'Toast in-app pour les alertes en temps réel',
+    ],
+  },
+  {
+    version: '2.3.0',
+    date: '15 Fév 2025',
+    title: 'Admin & Tarifs',
+    changes: [
+      'Système de rôles (Admin, Pro, Free)',
+      'Page Tarifs avec plans Gratuit et Pro (9.99€/mois)',
+      'Badge rôle dans le header',
+      'BlurOverlay intelligent selon le rôle',
+    ],
+  },
+  {
     version: '2.2.0',
     date: '15 Fév 2025',
     title: 'Comptes & 200+ cryptos',

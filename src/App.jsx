@@ -5,6 +5,8 @@ import { loadAllData } from './utils/api';
 import { computeSentiment, computeOpportunityIndex } from './utils/sentiment';
 import { runBacktestOptimization } from './utils/backtest';
 import { getCurrentUser, logout as authLogout } from './utils/auth';
+import { saveOppScore } from './utils/oppHistory';
+import { checkAndNotify } from './utils/alerts';
 
 import Header from './components/Header';
 import FearGreedIndex from './components/FearGreedIndex';
@@ -19,6 +21,7 @@ import GuidePage from './components/GuidePage';
 import PricingPage from './components/PricingPage';
 import AuthModal from './components/AuthModal';
 import BlurOverlay from './components/BlurOverlay';
+import AlertBanner from './components/AlertBanner';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -38,6 +41,7 @@ export default function App() {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [alertBanner, setAlertBanner] = useState(null);
 
   const isAuthenticated = !!user;
   const hasAccess = user?.role === 'admin' || user?.role === 'premium';
@@ -103,7 +107,14 @@ export default function App() {
       const currentFg = finalFg[finalFg.length - 1]?.value || 0;
       const btc = finalCryptos.find((c) => c.sym === 'BTC');
       const opp = computeOpportunityIndex(currentFg, finalCryptos, btc?.price || 0, btc?.ath || 0, null);
-      setPrevOppScore((prev) => (prev === null ? opp.score : prev));
+      saveOppScore(opp.score);
+      setPrevOppScore((prev) => {
+        const prevVal = prev === null ? opp.score : prev;
+        checkAndNotify(opp.score, prevVal).then((alert) => {
+          if (alert) setAlertBanner(alert);
+        });
+        return opp.score;
+      });
     }
   }, []);
 
@@ -154,6 +165,7 @@ export default function App() {
     <div className="min-h-screen bg-[#0b0b14] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onAuth={handleAuth} />}
+      {alertBanner && <AlertBanner alert={alertBanner} onClose={() => setAlertBanner(null)} />}
 
       <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
         <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -205,7 +217,7 @@ export default function App() {
         {activeTab === 'guide' && <GuidePage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
-          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.3</p>
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.4</p>
           <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinGecko — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>
