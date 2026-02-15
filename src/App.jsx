@@ -134,12 +134,12 @@ export default function App() {
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
 
       <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate} activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </header>
 
-      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6">
+      <main className="w-full px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'dashboard' && (
           <>
             {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
@@ -162,7 +162,7 @@ export default function App() {
                   <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
                   {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
                 </div>
               </>
@@ -173,7 +173,7 @@ export default function App() {
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
 
-        <footer className="mt-16 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
+        <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
           <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.1</p>
           <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinCap — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
