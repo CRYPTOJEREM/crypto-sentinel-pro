@@ -1,5 +1,17 @@
 const UPDATES = [
   {
+    version: '2.7.0',
+    date: '15 Fev 2026',
+    title: 'Scanner Bitunix Perpetual',
+    changes: [
+      'Scanner filtre aux paires Bitunix Perpetual Futures uniquement (210+ paires)',
+      'Cartes resume par signal (Achat Fort, Bullish, Bearish, Neutre, etc.)',
+      'Suppression des references RSI(6) visibles — signaux simplifies',
+      'Design zoom : tailles de police, paddings et espacements augmentes',
+      'Largeur max etendue a 7xl pour meilleur confort',
+    ],
+  },
+  {
     version: '2.6.0',
     date: '15 Fev 2025',
     title: 'Scanner RSI + Bitunix',
