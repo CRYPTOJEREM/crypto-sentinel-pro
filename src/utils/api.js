@@ -49,32 +49,34 @@ export const fetchBtcHistory = async () => {
   }
 };
 
-// Top 100 cryptos — CoinGecko (single page)
+// Top cryptos — CoinGecko (250 max, filtré par market cap > 50M$)
 export const fetchCryptos = async () => {
   try {
-    const url = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
+    const url = `${CONFIG.COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${CONFIG.CRYPTO_COUNT}&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d%2C30d`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Markets error: ${res.status}`);
     const coins = await res.json();
     if (!Array.isArray(coins)) throw new Error('Invalid format');
-    const data = coins.map((coin, i) => ({
-      id: i + 1,
-      cgId: coin.id,
-      sym: coin.symbol.toUpperCase(),
-      name: coin.name,
-      image: coin.image,
-      price: coin.current_price || 0,
-      marketCap: coin.market_cap || 0,
-      volume24h: coin.total_volume || 0,
-      c1h: coin.price_change_percentage_1h_in_currency || 0,
-      c24: coin.price_change_percentage_24h || 0,
-      c7: coin.price_change_percentage_7d_in_currency || 0,
-      c30: coin.price_change_percentage_30d_in_currency || 0,
-      ath: coin.ath || 0,
-      athChange: coin.ath_change_percentage || 0,
-      sparkline: coin.sparkline_in_7d?.price || [],
-      vwap24Hr: 0,
-    }));
+    const data = coins
+      .filter((coin) => (coin.market_cap || 0) >= CONFIG.MIN_MARKET_CAP)
+      .map((coin, i) => ({
+        id: i + 1,
+        cgId: coin.id,
+        sym: coin.symbol.toUpperCase(),
+        name: coin.name,
+        image: coin.image,
+        price: coin.current_price || 0,
+        marketCap: coin.market_cap || 0,
+        volume24h: coin.total_volume || 0,
+        c1h: coin.price_change_percentage_1h_in_currency || 0,
+        c24: coin.price_change_percentage_24h || 0,
+        c7: coin.price_change_percentage_7d_in_currency || 0,
+        c30: coin.price_change_percentage_30d_in_currency || 0,
+        ath: coin.ath || 0,
+        athChange: coin.ath_change_percentage || 0,
+        sparkline: coin.sparkline_in_7d?.price || [],
+        vwap24Hr: 0,
+      }));
     saveCache('cryptos', data);
     return data;
   } catch (err) {
@@ -85,16 +87,10 @@ export const fetchCryptos = async () => {
 
 // Sequential loading — staggers CoinGecko calls to avoid rate limit
 export const loadAllData = async (isFirstLoad, setCryptos) => {
-  // 1. Fear & Greed (different API, no rate issue)
   const fgData = await fetchWithRetry(fetchFearGreedData);
-
-  // 2. Wait then fetch cryptos
   await wait(1500);
   const cryptoData = await fetchWithRetry(fetchCryptos);
-
-  // 3. Wait then fetch BTC history
   await wait(2000);
   const btcData = await fetchWithRetry(fetchBtcHistory);
-
   return { fgData, cryptoData, btcData };
 };

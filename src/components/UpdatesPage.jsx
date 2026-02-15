@@ -1,5 +1,16 @@
 const UPDATES = [
   {
+    version: '2.2.0',
+    date: '15 Fév 2025',
+    title: 'Comptes & 200+ cryptos',
+    changes: [
+      'Système de comptes utilisateurs (inscription / connexion)',
+      'Contenu protégé : Fear & Greed visible, reste flouté sans compte',
+      'Passage à 200+ cryptos (market cap > 50M$)',
+      'Design Apple : coins plus arrondis, bordures subtiles, transitions fluides',
+    ],
+  },
+  {
     version: '2.1.0',
     date: '14 Fév 2025',
     title: 'Redesign minimaliste',
@@ -57,7 +68,7 @@ export default function UpdatesPage() {
 
       <div className="space-y-6">
         {UPDATES.map((update, i) => (
-          <div key={i} className="bg-[#16162a] border border-[#2a2a45] rounded-xl p-5">
+          <div key={i} className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-5">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">

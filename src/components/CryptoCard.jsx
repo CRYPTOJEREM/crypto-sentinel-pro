@@ -11,7 +11,7 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
 
   return (
     <div
-      className="bg-[#16162a] border border-[#2a2a45] rounded-xl p-4 cursor-pointer transition-all duration-200 hover:bg-[#1e1e38] hover:border-[#3d3d5c] animate-fadeInUp overflow-hidden"
+      className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-4 cursor-pointer transition-all duration-300 ease-out hover:bg-[#1e1e38] hover:border-[#3d3d5c] hover:shadow-lg hover:shadow-black/20 animate-fadeInUp overflow-hidden"
       style={{ animationDelay: `${Math.min(index * 0.02, 0.4)}s` }}
       onClick={() => setExp(!exp)}
     >
@@ -65,7 +65,7 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs px-3 py-2 bg-[#111122] border border-[#222238] rounded-lg">
+      <div className="flex items-center justify-between text-xs px-3 py-2 bg-[#111122] border border-[#222238]/70 rounded-xl">
         <span className="text-zinc-400">Trend 7j</span>
         <span className={`font-medium font-mono ${flow >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
           {flow >= 0 ? '+ Hausse' : '- Baisse'} ({flow > 0 ? '+' : ''}{flow}%)
@@ -76,7 +76,7 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
         <div className="mt-3 pt-3 border-t border-[#2a2a45] space-y-2.5 animate-fadeInUp">
           <div className="grid grid-cols-3 gap-2 text-center">
             {[{ l: '24H', v: cr.c24 }, { l: '7J', v: cr.c7 }, { l: '30J', v: cr.c30 }].map((x, i) => (
-              <div key={i} className="bg-[#111122] border border-[#222238] rounded-lg p-2">
+              <div key={i} className="bg-[#111122] border border-[#222238]/70 rounded-xl p-2">
                 <div className="text-[9px] text-zinc-500 font-medium uppercase">{x.l}</div>
                 <div className={`text-xs font-semibold font-mono ${(x.v || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {(x.v || 0) >= 0 ? '+' : ''}{(x.v || 0).toFixed(1)}%
@@ -85,13 +85,13 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
             ))}
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-[#111122] border border-[#222238] rounded-lg p-2">
+            <div className="bg-[#111122] border border-[#222238]/70 rounded-xl p-2">
               <div className="text-[9px] text-zinc-500 font-medium uppercase">Market Cap</div>
               <div className="text-white font-semibold font-mono">
                 ${cr.marketCap > 1e9 ? (cr.marketCap / 1e9).toFixed(1) + 'B' : (cr.marketCap / 1e6).toFixed(0) + 'M'}
               </div>
             </div>
-            <div className="bg-[#111122] border border-[#222238] rounded-lg p-2">
+            <div className="bg-[#111122] border border-[#222238]/70 rounded-xl p-2">
               <div className="text-[9px] text-zinc-500 font-medium uppercase">Volume 24h</div>
               <div className="text-white font-semibold font-mono">
                 ${cr.volume24h > 1e9 ? (cr.volume24h / 1e9).toFixed(1) + 'B' : (cr.volume24h / 1e6).toFixed(0) + 'M'}

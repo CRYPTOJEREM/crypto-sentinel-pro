@@ -1,6 +1,6 @@
 export default function Filters({ filter, setFilter, search, setSearch, sort, setSort }) {
   return (
-    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5 p-3 bg-[#16162a] border border-[#2a2a45] rounded-xl animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5 p-4 bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
       <div className="relative w-full lg:w-64">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

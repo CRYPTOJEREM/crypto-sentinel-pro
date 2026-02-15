@@ -4,7 +4,7 @@ export default function Disclaimer({ onAccept }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
     >
-      <div className="bg-[#16162a] border border-[#2a2a45] rounded-xl max-w-lg w-full p-8 animate-fadeInUp">
+      <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl max-w-lg w-full p-8 animate-fadeInUp">
         <h2 className="text-lg font-semibold text-white mb-1">Avertissement</h2>
         <p className="text-xs text-zinc-500 mb-5">Veuillez lire attentivement avant de continuer</p>
 
@@ -29,7 +29,7 @@ export default function Disclaimer({ onAccept }) {
 
         <button
           onClick={onAccept}
-          className="w-full py-3 rounded-lg font-semibold text-sm transition-all bg-blue-600 hover:bg-blue-500 text-white"
+          className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-blue-600 hover:bg-blue-500 text-white"
         >
           J'accepte et je continue
         </button>

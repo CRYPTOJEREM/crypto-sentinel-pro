@@ -6,7 +6,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
   const [range, setRange] = useState('1y');
 
   if (!history || history.length === 0)
-    return <div className="bg-[#16162a] border border-[#2a2a45] rounded-xl p-6"><Loader text="Chargement Fear & Greed..." /></div>;
+    return <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-6"><Loader text="Chargement Fear & Greed..." /></div>;
 
   const c = getFearGreedClass(value);
   const yesterday = history[history.length - 2]?.value || 0;
@@ -34,7 +34,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
   };
 
   return (
-    <div className="bg-[#16162a] border border-[#2a2a45] rounded-xl p-5 animate-fadeInUp flex flex-col">
+    <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-5 animate-fadeInUp flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-zinc-300">Fear & Greed Index</h3>
@@ -90,7 +90,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-[140px] bg-[#111122] rounded-lg overflow-hidden border border-[#222238]">
+      <div className="relative flex-1 min-h-[140px] bg-[#111122] rounded-xl overflow-hidden border border-[#222238]/70">
         <div className="absolute right-2 top-0 bottom-0 flex flex-col justify-between py-2 text-[8px] font-mono z-10 text-zinc-700">
           <span>100</span><span>50</span><span>0</span>
         </div>

@@ -4,6 +4,7 @@ import { loadCache } from './utils/cache';
 import { loadAllData } from './utils/api';
 import { computeSentiment, computeOpportunityIndex } from './utils/sentiment';
 import { runBacktestOptimization } from './utils/backtest';
+import { getCurrentUser, logout as authLogout } from './utils/auth';
 
 import Header from './components/Header';
 import FearGreedIndex from './components/FearGreedIndex';
@@ -15,6 +16,8 @@ import Loader from './components/Loader';
 import ErrorBanner from './components/ErrorBanner';
 import UpdatesPage from './components/UpdatesPage';
 import GuidePage from './components/GuidePage';
+import AuthModal from './components/AuthModal';
+import BlurOverlay from './components/BlurOverlay';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -32,6 +35,10 @@ export default function App() {
   const [prevOppScore, setPrevOppScore] = useState(null);
   const [optResult, setOptResult] = useState(null);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  const [user, setUser] = useState(getCurrentUser());
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const isAuthenticated = !!user;
 
   const fgVal = fgHist.length > 0 ? fgHist[fgHist.length - 1].value : 0;
   const btcCoin = cryptos.find((c) => c.sym === 'BTC');
@@ -129,13 +136,23 @@ export default function App() {
 
   const isLive = !loading && errors.length === 0 && lastUpdate !== 'cache';
 
+  const handleLogout = () => {
+    authLogout();
+    setUser(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#0b0b14] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onAuth={(email) => { setUser(email); setShowAuthModal(false); }} />}
 
       <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <Header isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate} activeTab={activeTab} setActiveTab={setActiveTab} />
+          <Header
+            isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate}
+            activeTab={activeTab} setActiveTab={setActiveTab}
+            user={user} onLoginClick={() => setShowAuthModal(true)} onLogout={handleLogout}
+          />
         </div>
       </header>
 
@@ -150,21 +167,25 @@ export default function App() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                   <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
-                  <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
+                  <BlurOverlay locked={!isAuthenticated} onClickUnlock={() => setShowAuthModal(true)}>
+                    <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
+                  </BlurOverlay>
                 </div>
 
-                <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
+                <BlurOverlay locked={!isAuthenticated} onClickUnlock={() => setShowAuthModal(true)}>
+                  <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
 
-                <div className="flex items-center justify-between mb-4 text-sm">
-                  <span className="text-zinc-400">
-                    <span className="text-white font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
-                  </span>
-                  <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
-                </div>
+                  <div className="flex items-center justify-between mb-4 text-sm">
+                    <span className="text-zinc-400">
+                      <span className="text-white font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
+                    </span>
+                    <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
+                  </div>
 
-                <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
-                  {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
-                </div>
+                  <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+                    {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
+                  </div>
+                </BlurOverlay>
               </>
             )}
           </>
@@ -174,8 +195,8 @@ export default function App() {
         {activeTab === 'guide' && <GuidePage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
-          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.1</p>
-          <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinCap — Ce site ne constitue pas un conseil en investissement.</p>
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.2</p>
+          <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinGecko — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>
     </div>
