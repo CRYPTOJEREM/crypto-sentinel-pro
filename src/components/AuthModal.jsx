@@ -18,7 +18,7 @@ export default function AuthModal({ onClose, onAuth }) {
 
     setLoading(false);
     if (result.ok) {
-      onAuth(result.email);
+      onAuth({ email: result.email, role: result.role });
       onClose();
     } else {
       setError(result.error);

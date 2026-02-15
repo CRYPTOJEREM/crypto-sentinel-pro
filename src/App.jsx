@@ -16,6 +16,7 @@ import Loader from './components/Loader';
 import ErrorBanner from './components/ErrorBanner';
 import UpdatesPage from './components/UpdatesPage';
 import GuidePage from './components/GuidePage';
+import PricingPage from './components/PricingPage';
 import AuthModal from './components/AuthModal';
 import BlurOverlay from './components/BlurOverlay';
 
@@ -39,6 +40,7 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const isAuthenticated = !!user;
+  const hasAccess = user?.role === 'admin' || user?.role === 'premium';
 
   const fgVal = fgHist.length > 0 ? fgHist[fgHist.length - 1].value : 0;
   const btcCoin = cryptos.find((c) => c.sym === 'BTC');
@@ -141,10 +143,17 @@ export default function App() {
     setUser(null);
   };
 
+  const handleAuth = (userData) => {
+    setUser(userData);
+    setShowAuthModal(false);
+  };
+
+  const goToPricing = () => setActiveTab('pricing');
+
   return (
     <div className="min-h-screen bg-[#0b0b14] text-zinc-100">
       {!disclaimerAccepted && <Disclaimer onAccept={() => setDisclaimerAccepted(true)} />}
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onAuth={(email) => { setUser(email); setShowAuthModal(false); }} />}
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onAuth={handleAuth} />}
 
       <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
         <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -167,12 +176,12 @@ export default function App() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                   <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
-                  <BlurOverlay locked={!isAuthenticated} onClickUnlock={() => setShowAuthModal(true)}>
+                  <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
                     <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
                   </BlurOverlay>
                 </div>
 
-                <BlurOverlay locked={!isAuthenticated} onClickUnlock={() => setShowAuthModal(true)}>
+                <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
                   <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
 
                   <div className="flex items-center justify-between mb-4 text-sm">
@@ -191,11 +200,12 @@ export default function App() {
           </>
         )}
 
+        {activeTab === 'pricing' && <PricingPage userRole={user?.role || null} onLoginClick={() => setShowAuthModal(true)} />}
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
-          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.2</p>
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.3</p>
           <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinGecko — Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>

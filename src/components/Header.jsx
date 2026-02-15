@@ -1,9 +1,19 @@
+const ROLE_BADGE = {
+  admin: { label: 'Admin', cls: 'bg-red-500/15 text-red-400' },
+  premium: { label: 'Pro', cls: 'bg-blue-500/15 text-blue-400' },
+  free: { label: 'Free', cls: 'bg-zinc-500/15 text-zinc-400' },
+};
+
 export default function Header({ isLive, time, stats, lastUpdate, activeTab, setActiveTab, user, onLoginClick, onLogout }) {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
+    { id: 'pricing', label: 'Tarifs' },
     { id: 'updates', label: 'Mises à jour' },
     { id: 'guide', label: 'Guide' },
   ];
+
+  const badge = user ? ROLE_BADGE[user.role] || ROLE_BADGE.free : null;
+  const displayEmail = user?.email || '';
 
   return (
     <header className="py-4">
@@ -39,7 +49,14 @@ export default function Header({ isLive, time, stats, lastUpdate, activeTab, set
 
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400 hidden sm:block">{user.length > 20 ? user.slice(0, 20) + '...' : user}</span>
+              {badge && (
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${badge.cls}`}>
+                  {badge.label}
+                </span>
+              )}
+              <span className="text-xs text-zinc-400 hidden sm:block">
+                {displayEmail.length > 20 ? displayEmail.slice(0, 20) + '...' : displayEmail}
+              </span>
               <button onClick={onLogout} className="px-3 py-1.5 bg-[#111122] border border-[#2a2a45] rounded-xl text-xs text-zinc-400 hover:text-white hover:border-zinc-500 transition-all">
                 Déconnexion
               </button>
