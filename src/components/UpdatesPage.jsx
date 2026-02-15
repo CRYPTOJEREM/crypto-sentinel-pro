@@ -1,14 +1,26 @@
 const UPDATES = [
   {
+    version: '2.6.0',
+    date: '15 Fev 2025',
+    title: 'Scanner RSI + Bitunix',
+    changes: [
+      'Scanner RSI(6) + Sentiment : tableau complet de toutes les cryptos avec signaux',
+      'Signal global combine RSI(6) et score sentiment de l\'algo (ACHAT FORT, BULLISH, PRUDENCE...)',
+      'Tri par zone de continuation, RSI, sentiment, variation 24h',
+      'Bitunix UID demande a l\'inscription (stocke dans le profil)',
+      'Alertes activees par defaut a la creation de compte',
+    ],
+  },
+  {
     version: '2.5.0',
     date: '15 Fev 2025',
-    title: 'RSI(6) & TradingView',
+    title: 'RSI(6) & Indicateur',
     changes: [
-      'Nouvel onglet Indicateur avec graphique TradingView interactif',
+      'Nouvel onglet Indicateur dedie',
       'RSI(6) comme 6eme facteur de l\'algorithme (zone 60-64 = continuation haussiere)',
-      'Selecteur de crypto avec analyse RSI en temps reel',
-      'Jauge RSI visuelle avec zones colorees (surachat, survente, continuation)',
-      'Widget TradingView avec RSI(6) pre-charge en interval 4H',
+      'Historique du signal avec graphique SVG',
+      'Decomposition des 6 facteurs de l\'algo',
+      'Configuration et historique des alertes',
     ],
   },
   {

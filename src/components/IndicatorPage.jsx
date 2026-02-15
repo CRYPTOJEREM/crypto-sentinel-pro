@@ -1,83 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { getOppHistory } from '../utils/oppHistory';
 import { getAlertHistory, getAlertSettings, saveAlertSettings, testNotification } from '../utils/alerts';
 import { getOppClass } from '../utils/classifications';
-import { computeRSI } from '../utils/sentiment';
-
-const TOP_CRYPTOS = [
-  { sym: 'BTC', label: 'Bitcoin' },
-  { sym: 'ETH', label: 'Ethereum' },
-  { sym: 'SOL', label: 'Solana' },
-  { sym: 'BNB', label: 'BNB' },
-  { sym: 'XRP', label: 'XRP' },
-  { sym: 'ADA', label: 'Cardano' },
-  { sym: 'AVAX', label: 'Avalanche' },
-  { sym: 'DOT', label: 'Polkadot' },
-  { sym: 'MATIC', label: 'Polygon' },
-  { sym: 'LINK', label: 'Chainlink' },
-  { sym: 'DOGE', label: 'Dogecoin' },
-  { sym: 'SHIB', label: 'Shiba Inu' },
-];
+import { computeRSI, computeSentiment } from '../utils/sentiment';
 
 function getRSISignal(rsi) {
-  if (rsi === null) return { label: 'N/A', color: '#71717a', desc: 'Données insuffisantes' };
-  if (rsi >= 60 && rsi <= 64) return { label: 'Continuation haussiere', color: '#22c55e', desc: 'RSI(6) en zone 60-64 : signal de continuation de tendance haussiere. Forte probabilite de poursuite du mouvement.' };
-  if (rsi > 80) return { label: 'Surachat extreme', color: '#ef4444', desc: 'RSI(6) > 80 : zone de surachat extreme. Risque de correction a court terme.' };
-  if (rsi > 70) return { label: 'Surachat', color: '#f97316', desc: 'RSI(6) > 70 : zone de surachat. Mouvement haussier fort, mais attention a un retournement.' };
-  if (rsi < 20) return { label: 'Survente extreme', color: '#22c55e', desc: 'RSI(6) < 20 : zone de survente extreme. Potentiel rebond technique eleve.' };
-  if (rsi < 30) return { label: 'Survente', color: '#3b82f6', desc: 'RSI(6) < 30 : zone de survente. Opportunite d\'achat potentielle si le marche se stabilise.' };
-  if (rsi >= 55 && rsi < 60) return { label: 'Pre-continuation', color: '#eab308', desc: 'RSI(6) proche de la zone 60-64. Surveiller pour un signal de continuation.' };
-  return { label: 'Neutre', color: '#eab308', desc: 'RSI(6) en zone neutre. Pas de signal fort de direction.' };
+  if (rsi === null) return { label: 'N/A', color: '#71717a', short: '—' };
+  if (rsi >= 60 && rsi <= 64) return { label: 'Continuation', color: '#22c55e', short: 'UP' };
+  if (rsi > 80) return { label: 'Surachat++', color: '#ef4444', short: 'OB++' };
+  if (rsi > 70) return { label: 'Surachat', color: '#f97316', short: 'OB' };
+  if (rsi < 20) return { label: 'Survente++', color: '#22c55e', short: 'OS++' };
+  if (rsi < 30) return { label: 'Survente', color: '#3b82f6', short: 'OS' };
+  if (rsi >= 55 && rsi < 60) return { label: 'Pre-continuation', color: '#a3e635', short: 'PRE' };
+  return { label: 'Neutre', color: '#eab308', short: '—' };
 }
 
-function TradingViewWidget({ symbol }) {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.innerHTML = '';
-
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-    script.type = 'text/javascript';
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      autosize: true,
-      symbol: `BINANCE:${symbol}USDT`,
-      interval: '240',
-      timezone: 'Europe/Paris',
-      theme: 'dark',
-      style: '1',
-      locale: 'fr',
-      backgroundColor: 'rgba(11, 11, 20, 1)',
-      gridColor: 'rgba(42, 42, 69, 0.3)',
-      allow_symbol_change: true,
-      calendar: false,
-      support_host: 'https://www.tradingview.com',
-      studies: [
-        { id: 'RSI@tv-basicstudies', inputs: { length: 6 } },
-      ],
-    });
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'tradingview-widget-container__widget';
-    wrapper.style.height = '100%';
-    wrapper.style.width = '100%';
-
-    containerRef.current.appendChild(wrapper);
-    containerRef.current.appendChild(script);
-  }, [symbol]);
-
-  return (
-    <div className="tradingview-widget-container" ref={containerRef} style={{ height: '500px', width: '100%' }} />
-  );
+function getGlobalSignal(rsi, sentiment) {
+  if (rsi !== null && rsi >= 60 && rsi <= 64 && sentiment > 55) return { label: 'ACHAT FORT', color: '#22c55e' };
+  if (rsi !== null && rsi >= 60 && rsi <= 64) return { label: 'ACHAT', color: '#4ade80' };
+  if (rsi !== null && rsi < 20 && sentiment > 40) return { label: 'REBOND', color: '#3b82f6' };
+  if (sentiment > 65) return { label: 'BULLISH', color: '#22c55e' };
+  if (rsi !== null && rsi > 80) return { label: 'PRUDENCE', color: '#ef4444' };
+  if (sentiment < 35) return { label: 'BEARISH', color: '#ef4444' };
+  return { label: 'NEUTRE', color: '#eab308' };
 }
 
 export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }) {
   const [range, setRange] = useState('30d');
   const [settings, setSettings] = useState(getAlertSettings);
   const [testResult, setTestResult] = useState(null);
-  const [selectedCrypto, setSelectedCrypto] = useState('BTC');
+  const [scanSearch, setScanSearch] = useState('');
+  const [scanSort, setScanSort] = useState('continuation');
 
   const oppHistory = getOppHistory();
   const alertHistory = getAlertHistory().reverse();
@@ -110,10 +63,39 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
       .filter(Boolean);
   };
 
-  // RSI analysis for selected crypto
-  const selectedCoin = (cryptos || []).find((co) => co.sym === selectedCrypto);
-  const rsiValue = selectedCoin?.sparkline ? computeRSI(selectedCoin.sparkline, 6) : null;
-  const rsiSignal = getRSISignal(rsiValue);
+  // Scanner data: compute RSI + sentiment for each crypto
+  const scannerData = useMemo(() => {
+    if (!cryptos || cryptos.length === 0) return [];
+    return cryptos.map((coin) => {
+      const rsi = coin.sparkline && coin.sparkline.length >= 7 ? computeRSI(coin.sparkline, 6) : null;
+      const sentiment = computeSentiment(coin);
+      const rsiSignal = getRSISignal(rsi);
+      const globalSignal = getGlobalSignal(rsi, sentiment);
+      return { ...coin, rsi, sentiment, rsiSignal, globalSignal };
+    });
+  }, [cryptos]);
+
+  const filteredScanner = useMemo(() => {
+    let data = scannerData;
+    if (scanSearch) {
+      const q = scanSearch.toLowerCase();
+      data = data.filter((c) => c.sym.toLowerCase().includes(q) || c.name.toLowerCase().includes(q));
+    }
+    return data.sort((a, b) => {
+      if (scanSort === 'continuation') {
+        const aInZone = a.rsi !== null && a.rsi >= 60 && a.rsi <= 64 ? 1 : 0;
+        const bInZone = b.rsi !== null && b.rsi >= 60 && b.rsi <= 64 ? 1 : 0;
+        if (bInZone !== aInZone) return bInZone - aInZone;
+        return (b.sentiment || 0) - (a.sentiment || 0);
+      }
+      if (scanSort === 'rsi') return (b.rsi || 0) - (a.rsi || 0);
+      if (scanSort === 'sentiment') return (b.sentiment || 0) - (a.sentiment || 0);
+      if (scanSort === 'change') return (b.c24 || 0) - (a.c24 || 0);
+      return a.id - b.id;
+    });
+  }, [scannerData, scanSearch, scanSort]);
+
+  const continuationCount = scannerData.filter((c) => c.rsi !== null && c.rsi >= 60 && c.rsi <= 64).length;
 
   const signal = oppScore >= settings.buyThreshold ? 'buy' : oppScore <= settings.sellThreshold ? 'sell' : 'neutral';
   const signalLabel = signal === 'buy' ? "ZONE D'ACHAT" : signal === 'sell' ? 'ZONE PRUDENCE' : 'NEUTRE';
@@ -121,7 +103,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
   const signalBg = signal === 'buy' ? 'bg-emerald-500/10 border-emerald-500/30' : signal === 'sell' ? 'bg-red-500/10 border-red-500/30' : 'bg-yellow-500/10 border-yellow-500/30';
 
   return (
-    <div className="animate-fadeInUp max-w-5xl mx-auto space-y-6">
+    <div className="animate-fadeInUp max-w-6xl mx-auto space-y-6">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white mb-2">Indicateur Crypto Sentinel</h2>
         <p className="text-sm text-zinc-500">Signal d'achat/vente base sur l'algorithme proprietaire — 6 facteurs dont RSI(6), backtest 2 ans</p>
@@ -147,82 +129,117 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
         </div>
       </div>
 
-      {/* TradingView Chart + Crypto Selector */}
+      {/* Scanner RSI(6) + Sentiment */}
       <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-zinc-300">Graphique TradingView</h3>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-300">Scanner RSI(6) + Sentiment</h3>
+            <p className="text-[11px] text-zinc-600 mt-0.5">
+              <span className="text-emerald-400 font-semibold font-mono">{continuationCount}</span> crypto{continuationCount > 1 ? 's' : ''} en zone de continuation (RSI 60-64)
+            </p>
+          </div>
           <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={scanSearch}
+              onChange={(e) => setScanSearch(e.target.value)}
+              placeholder="Rechercher..."
+              className="bg-[#111122] border border-[#222238] rounded-lg px-3 py-1.5 text-xs text-zinc-300 w-36 focus:outline-none focus:border-blue-500 transition-colors placeholder-zinc-700"
+            />
             <select
-              value={selectedCrypto}
-              onChange={(e) => setSelectedCrypto(e.target.value)}
-              className="bg-[#111122] border border-[#222238] rounded-lg px-3 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-blue-500 transition-colors"
+              value={scanSort}
+              onChange={(e) => setScanSort(e.target.value)}
+              className="bg-[#111122] border border-[#222238] rounded-lg px-2 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-blue-500 transition-colors"
             >
-              {TOP_CRYPTOS.map((cr) => (
-                <option key={cr.sym} value={cr.sym}>{cr.sym} — {cr.label}</option>
-              ))}
+              <option value="continuation">Zone continuation</option>
+              <option value="rsi">RSI(6)</option>
+              <option value="sentiment">Sentiment</option>
+              <option value="change">Variation 24h</option>
+              <option value="rank">Rang</option>
             </select>
           </div>
         </div>
-        <div className="rounded-xl overflow-hidden border border-[#222238]/70">
-          <TradingViewWidget symbol={selectedCrypto} />
-        </div>
-      </div>
 
-      {/* RSI(6) Analysis Panel */}
-      <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-zinc-300 mb-4">Analyse RSI(6) — {selectedCrypto}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* RSI Value */}
-          <div className="bg-[#111122] border border-[#222238]/70 rounded-xl p-4 text-center">
-            <p className="text-[10px] text-zinc-600 uppercase mb-2">RSI(6) Actuel</p>
-            <p className="text-3xl font-bold font-mono" style={{ color: rsiSignal.color }}>
-              {rsiValue !== null ? rsiValue : '—'}
-            </p>
-            {selectedCoin && (
-              <p className="text-[10px] text-zinc-600 mt-1 font-mono">
-                Prix: ${selectedCoin.price?.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-              </p>
-            )}
-          </div>
-          {/* Signal */}
-          <div className="bg-[#111122] border border-[#222238]/70 rounded-xl p-4">
-            <p className="text-[10px] text-zinc-600 uppercase mb-2">Signal</p>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: rsiSignal.color }} />
-              <span className="text-sm font-semibold" style={{ color: rsiSignal.color }}>{rsiSignal.label}</span>
-            </div>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">{rsiSignal.desc}</p>
-          </div>
-          {/* RSI Gauge */}
-          <div className="bg-[#111122] border border-[#222238]/70 rounded-xl p-4">
-            <p className="text-[10px] text-zinc-600 uppercase mb-2">Zone RSI</p>
-            <div className="relative h-4 rounded-full overflow-hidden bg-[#0b0b14] mt-3">
-              <div className="absolute inset-0 flex">
-                <div className="h-full bg-emerald-500/30" style={{ width: '20%' }} />
-                <div className="h-full bg-blue-500/20" style={{ width: '10%' }} />
-                <div className="h-full bg-yellow-500/15" style={{ width: '26%' }} />
-                <div className="h-full bg-emerald-500/40" style={{ width: '4%' }} title="Zone 60-64" />
-                <div className="h-full bg-yellow-500/15" style={{ width: '6%' }} />
-                <div className="h-full bg-orange-500/25" style={{ width: '14%' }} />
-                <div className="h-full bg-red-500/30" style={{ width: '20%' }} />
-              </div>
-              {rsiValue !== null && (
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg shadow-white/50"
-                  style={{ left: `${rsiValue}%` }}
-                />
-              )}
-            </div>
-            <div className="flex justify-between mt-1.5 text-[9px] font-mono text-zinc-700">
-              <span>0</span>
-              <span>30</span>
-              <span>60</span>
-              <span>64</span>
-              <span>70</span>
-              <span>100</span>
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-[#222238]/70 text-zinc-600 uppercase text-[10px]">
+                <th className="text-left py-2 px-2 font-medium">#</th>
+                <th className="text-left py-2 px-2 font-medium">Crypto</th>
+                <th className="text-right py-2 px-2 font-medium">Prix</th>
+                <th className="text-right py-2 px-2 font-medium">24h</th>
+                <th className="text-right py-2 px-2 font-medium">RSI(6)</th>
+                <th className="text-center py-2 px-2 font-medium">Signal RSI</th>
+                <th className="text-right py-2 px-2 font-medium">Sentiment</th>
+                <th className="text-center py-2 px-2 font-medium">Signal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredScanner.slice(0, 100).map((coin) => {
+                const inZone = coin.rsi !== null && coin.rsi >= 60 && coin.rsi <= 64;
+                const rowBg = inZone ? 'bg-emerald-500/5' : '';
+                return (
+                  <tr key={coin.cgId || coin.id} className={`border-b border-[#222238]/30 hover:bg-[#111122]/80 transition-colors ${rowBg}`}>
+                    <td className="py-2 px-2 text-zinc-600 font-mono">{coin.id}</td>
+                    <td className="py-2 px-2">
+                      <div className="flex items-center gap-2">
+                        {coin.image && <img src={coin.image} alt="" className="w-4 h-4 rounded-full" />}
+                        <span className="text-zinc-200 font-medium">{coin.sym}</span>
+                        <span className="text-zinc-600 hidden sm:inline">{coin.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-2 px-2 text-right font-mono text-zinc-300">
+                      ${coin.price < 1 ? coin.price?.toFixed(4) : coin.price?.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                    </td>
+                    <td className={`py-2 px-2 text-right font-mono font-semibold ${(coin.c24 || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {(coin.c24 || 0) >= 0 ? '+' : ''}{(coin.c24 || 0).toFixed(1)}%
+                    </td>
+                    <td className="py-2 px-2 text-right font-mono font-semibold" style={{ color: coin.rsiSignal.color }}>
+                      {coin.rsi !== null ? coin.rsi : '—'}
+                    </td>
+                    <td className="py-2 px-2 text-center">
+                      <span
+                        className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                        style={{ color: coin.rsiSignal.color, backgroundColor: coin.rsiSignal.color + '15' }}
+                      >
+                        {coin.rsiSignal.label}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <div className="w-12 h-1.5 bg-[#0b0b14] rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${coin.sentiment}%`,
+                              backgroundColor: coin.sentiment > 60 ? '#22c55e' : coin.sentiment < 40 ? '#ef4444' : '#eab308',
+                            }}
+                          />
+                        </div>
+                        <span className="font-mono font-semibold w-6 text-right" style={{
+                          color: coin.sentiment > 60 ? '#22c55e' : coin.sentiment < 40 ? '#ef4444' : '#eab308',
+                        }}>
+                          {coin.sentiment}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-2 px-2 text-center">
+                      <span
+                        className="inline-block px-2 py-0.5 rounded text-[10px] font-bold"
+                        style={{ color: coin.globalSignal.color, backgroundColor: coin.globalSignal.color + '15' }}
+                      >
+                        {coin.globalSignal.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+        {filteredScanner.length > 100 && (
+          <p className="text-[10px] text-zinc-700 mt-2 text-center">Affichage limite a 100 cryptos</p>
+        )}
       </div>
 
       {/* Historique du signal */}
@@ -392,23 +409,23 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
           <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1">
               <span className="w-3 h-3 rounded-full bg-emerald-500" />
-              <span className="text-xs font-semibold text-emerald-400">Score &gt; {settings.buyThreshold}</span>
+              <span className="text-xs font-semibold text-emerald-400">RSI 60-64 + Sentiment &gt; 55</span>
             </div>
-            <p className="text-[11px] text-zinc-500">Zone d'achat. Conditions favorables. L'algo detecte un alignement positif des 6 facteurs dont le RSI(6).</p>
+            <p className="text-[11px] text-zinc-500">Signal ACHAT FORT. RSI en zone de continuation haussiere confirme par un sentiment positif des 6 facteurs.</p>
           </div>
           <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1">
               <span className="w-3 h-3 rounded-full bg-yellow-500" />
-              <span className="text-xs font-semibold text-yellow-400">{settings.sellThreshold} - {settings.buyThreshold}</span>
+              <span className="text-xs font-semibold text-yellow-400">Zone neutre</span>
             </div>
-            <p className="text-[11px] text-zinc-500">Zone neutre. Pas de signal clair. Attendre une confirmation avant d'agir.</p>
+            <p className="text-[11px] text-zinc-500">Pas de signal clair. RSI hors zone et/ou sentiment mitige. Attendre une confirmation.</p>
           </div>
           <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1">
               <span className="w-3 h-3 rounded-full bg-red-500" />
-              <span className="text-xs font-semibold text-red-400">Score &lt; {settings.sellThreshold}</span>
+              <span className="text-xs font-semibold text-red-400">RSI &gt; 80 ou Sentiment &lt; 35</span>
             </div>
-            <p className="text-[11px] text-zinc-500">Zone de prudence. Conditions defavorables. Renforcer la gestion du risque.</p>
+            <p className="text-[11px] text-zinc-500">Signal PRUDENCE. Surachat extreme ou conditions defavorables. Gestion du risque renforcee.</p>
           </div>
         </div>
       </div>

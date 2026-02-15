@@ -5,6 +5,7 @@ export default function AuthModal({ onClose, onAuth }) {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [bitunixUid, setBitunixUid] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -13,8 +14,9 @@ export default function AuthModal({ onClose, onAuth }) {
     setError('');
     setLoading(true);
 
-    const fn = mode === 'login' ? login : register;
-    const result = await fn(email, password);
+    const result = mode === 'login'
+      ? await login(email, password)
+      : await register(email, password, bitunixUid);
 
     setLoading(false);
     if (result.ok) {
@@ -73,6 +75,19 @@ export default function AuthModal({ onClose, onAuth }) {
               className="w-full bg-[#111122] border border-[#2a2a45] rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
             />
           </div>
+
+          {mode === 'register' && (
+            <div>
+              <label className="block text-xs text-zinc-400 mb-1.5 font-medium">Bitunix UID</label>
+              <input
+                type="text"
+                value={bitunixUid}
+                onChange={(e) => setBitunixUid(e.target.value)}
+                placeholder="Votre UID Bitunix (optionnel)"
+                className="w-full bg-[#111122] border border-[#2a2a45] rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+              />
+            </div>
+          )}
 
           {error && (
             <p className="text-red-400 text-xs bg-red-500/10 rounded-lg px-3 py-2">{error}</p>

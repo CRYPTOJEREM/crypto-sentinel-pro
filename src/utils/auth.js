@@ -32,7 +32,7 @@ async function ensureAdmin() {
 }
 ensureAdmin();
 
-export async function register(email, password) {
+export async function register(email, password, bitunixUid = '') {
   const e = email.trim().toLowerCase();
   if (!e || !e.includes('@')) return { ok: false, error: 'Email invalide' };
   if (password.length < 6) return { ok: false, error: 'Mot de passe trop court (min 6 caractères)' };
@@ -41,10 +41,11 @@ export async function register(email, password) {
   if (users[e]) return { ok: false, error: 'Ce compte existe déjà' };
 
   const hash = await hashPassword(password);
-  users[e] = { hash, role: 'free', createdAt: Date.now() };
+  const uid = (bitunixUid || '').trim();
+  users[e] = { hash, role: 'free', createdAt: Date.now(), bitunixUid: uid };
   saveUsers(users);
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role: 'free', ts: Date.now() }));
-  return { ok: true, email: e, role: 'free' };
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role: 'free', bitunixUid: uid, ts: Date.now() }));
+  return { ok: true, email: e, role: 'free', bitunixUid: uid };
 }
 
 export async function login(email, password) {
@@ -57,8 +58,9 @@ export async function login(email, password) {
   if (hash !== user.hash) return { ok: false, error: 'Mot de passe incorrect' };
 
   const role = user.role || 'free';
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role, ts: Date.now() }));
-  return { ok: true, email: e, role };
+  const uid = user.bitunixUid || '';
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role, bitunixUid: uid, ts: Date.now() }));
+  return { ok: true, email: e, role, bitunixUid: uid };
 }
 
 export function logout() {
@@ -69,7 +71,7 @@ export function getCurrentUser() {
   try {
     const session = JSON.parse(localStorage.getItem(SESSION_KEY));
     if (!session?.email) return null;
-    return { email: session.email, role: session.role || 'free' };
+    return { email: session.email, role: session.role || 'free', bitunixUid: session.bitunixUid || '' };
   } catch {
     return null;
   }
