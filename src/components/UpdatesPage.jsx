@@ -40,9 +40,9 @@ const UPDATES = [
     title: 'RSI(6) & Indicateur',
     changes: [
       'Nouvel onglet Indicateur dedie',
-      'RSI(6) comme 6eme facteur de l\'algorithme (zone 60-64 = continuation haussiere)',
+      'RSI(6) integre dans l\'analyse (zone 60-64 = continuation haussiere)',
       'Historique du signal avec graphique SVG',
-      'Decomposition des 6 facteurs de l\'algo',
+      'Decomposition du signal en temps reel',
       'Configuration et historique des alertes',
     ],
   },

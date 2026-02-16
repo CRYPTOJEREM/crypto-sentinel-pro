@@ -156,17 +156,15 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
 
       {showDetails && (
         <div className="mt-4 pt-4 border-t border-[#222238] animate-fadeInUp">
-          <h3 className="text-xs font-semibold text-zinc-400 mb-3">Guide rapide</h3>
+          <h3 className="text-xs font-semibold text-zinc-400 mb-3">Comment lire le score</h3>
           <div className="grid grid-cols-1 gap-2">
             {[
-              { n: 'F&G Contrarian', t: 'Peur = opportunité, Euphorie = prudence' },
-              { n: 'BTC vs ATH', t: 'Proche du record = marché en force' },
-              { n: 'Market Breadth', t: 'Large participation = marché sain' },
-              { n: 'Volatilité', t: 'Modérée = conditions idéales' },
-              { n: 'Momentum 30j', t: 'Tendance haussière = signal positif' },
+              { n: 'Score > 70', t: 'Conditions de marché favorables' },
+              { n: 'Score 40-70', t: 'Zone neutre, pas de signal clair' },
+              { n: 'Score < 40', t: 'Conditions défavorables, prudence' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-2 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: FACTOR_COLORS[i] }} />
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ['#34d399', '#fbbf24', '#f87171'][i] }} />
                 <span className="text-zinc-400 font-medium">{f.n}:</span>
                 <span className="text-zinc-600">{f.t}</span>
               </div>

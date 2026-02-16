@@ -143,7 +143,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
       <div className="text-center pt-6 pb-2">
         <h2 className="text-4xl font-bold text-white tracking-tight mb-3">Radar Crypto Sentinel</h2>
         <p className="text-base text-zinc-500 max-w-xl mx-auto leading-relaxed">
-          Algorithme proprietaire a 6 facteurs pour detecter les meilleures opportunites en temps reel.
+          Analysez les phases de marche en un coup d'oeil. Un outil pour simplifier vos decisions.
         </p>
       </div>
 
@@ -504,7 +504,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
         )}
       </div>
 
-      {/* Decomposition — 6 facteurs */}
+      {/* Decomposition du signal */}
       <div className="rounded-3xl border border-white/[0.06] p-8" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
         <h3 className="text-lg font-semibold text-white tracking-tight mb-6">Decomposition du signal</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -518,7 +518,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: fc }} />
-                    <span className="text-sm font-medium text-zinc-300">{ind.name}</span>
+                    <span className="text-sm font-medium text-zinc-300">Facteur {i + 1}</span>
                   </div>
                   <span className="text-lg font-bold font-mono" style={{ color: fc }}>{ind.current}</span>
                 </div>

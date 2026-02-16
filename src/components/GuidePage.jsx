@@ -12,9 +12,9 @@ const SECTIONS = [
     title: "Indice d'Opportunité",
     icon: '2',
     content: [
-      { q: "C'est quoi ?", a: "Un score composite propriétaire (0-100) qui agrège 5 facteurs pour estimer les conditions d'investissement actuelles. Les poids de chaque facteur sont optimisés par backtest sur 2 ans de données historiques." },
-      { q: 'Les 5 facteurs', a: "Fear/Greed Contrarian : inverse du F&G (peur = opportunité). BTC vs ATH : distance au record historique. Market Breadth : pourcentage de cryptos en hausse. Volatilité : stabilité du marché. Momentum 30j : tendance sur le dernier mois." },
-      { q: 'Comment utiliser', a: "Score > 70 = conditions favorables. Score 40-70 = neutre, pas de signal clair. Score < 40 = conditions défavorables. Cliquez sur chaque facteur pour une analyse détaillée en temps réel." },
+      { q: "C'est quoi ?", a: "Un score composite propriétaire (0-100) basé sur un algorithme multi-facteurs qui synthétise les conditions de marché actuelles. L'outil vous aide à lire le marché plus rapidement, sans remplacer votre jugement." },
+      { q: 'Comment le lire', a: "Score > 70 = conditions de marché favorables. Score 40-70 = neutre, pas de signal clair. Score < 40 = conditions défavorables. Chaque composante est visible dans la décomposition du signal." },
+      { q: 'Comment utiliser', a: "Utilisez ce score comme un outil de lecture rapide des conditions de marché. Il ne prédit pas le futur — il vous fait gagner du temps d'analyse. Vos décisions restent les vôtres." },
     ],
   },
   {
