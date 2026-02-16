@@ -24,6 +24,8 @@ import BlurOverlay from './components/BlurOverlay';
 import AlertBanner from './components/AlertBanner';
 import IndicatorPage from './components/IndicatorPage';
 import LandingPage from './components/LandingPage';
+import AccountPage from './components/AccountPage';
+import AdminPage from './components/AdminPage';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -169,21 +171,25 @@ export default function App() {
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onAuth={handleAuth} />}
       {alertBanner && <AlertBanner alert={alertBanner} onClose={() => setAlertBanner(null)} />}
 
-      <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <Header
-            isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate}
-            activeTab={activeTab} setActiveTab={setActiveTab}
-            user={user} onLoginClick={() => setShowAuthModal(true)} onLogout={handleLogout}
-          />
-        </div>
-      </header>
+      {activeTab !== 'home' && (
+        <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <Header
+              isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate}
+              activeTab={activeTab} setActiveTab={setActiveTab}
+              user={user} onLoginClick={() => setShowAuthModal(true)} onLogout={handleLogout}
+            />
+          </div>
+        </header>
+      )}
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'home' && (
           <LandingPage
             onStart={() => isAuthenticated ? setActiveTab('dashboard') : setShowAuthModal(true)}
             onPricing={goToPricing}
+            onLogin={() => setShowAuthModal(true)}
+            onAccount={() => setActiveTab('account')}
             isLoggedIn={isAuthenticated}
           />
         )}
@@ -230,6 +236,15 @@ export default function App() {
         {activeTab === 'pricing' && <PricingPage userRole={user?.role || null} onLoginClick={() => setShowAuthModal(true)} />}
         {activeTab === 'updates' && <UpdatesPage />}
         {activeTab === 'guide' && <GuidePage />}
+        {activeTab === 'account' && user && (
+          <AccountPage
+            user={user}
+            onUpdateUser={setUser}
+            onLogout={handleLogout}
+            onGoAdmin={() => setActiveTab('admin')}
+          />
+        )}
+        {activeTab === 'admin' && user?.role === 'admin' && <AdminPage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
           <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.8</p>

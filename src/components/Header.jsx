@@ -21,9 +21,9 @@ export default function Header({ isLive, time, stats, lastUpdate, activeTab, set
     <header className="py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-sm font-bold text-white">CS</div>
+          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-sm font-bold text-white cursor-pointer" onClick={() => setActiveTab('home')}>CS</div>
           <div>
-            <h1 className="text-lg font-bold text-white tracking-tight">Crypto Sentinel Pro</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight cursor-pointer" onClick={() => setActiveTab('home')}>Crypto Sentinel Pro</h1>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`flex items-center gap-1.5 text-xs ${isLive ? 'text-emerald-400' : 'text-zinc-500'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
@@ -50,19 +50,26 @@ export default function Header({ isLive, time, stats, lastUpdate, activeTab, set
           </div>
 
           {user ? (
-            <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('account')}
+              className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs transition-all duration-200 ${
+                activeTab === 'account' || activeTab === 'admin'
+                  ? 'bg-[#16162a] border border-white/[0.08] text-white'
+                  : 'bg-[#111122] border border-[#2a2a45] text-zinc-400 hover:text-white hover:border-zinc-500'
+              }`}
+            >
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: badge ? undefined : '#3b82f6', ...(badge?.cls.includes('red') ? { backgroundColor: 'rgba(248,113,113,0.15)', color: '#f87171' } : badge?.cls.includes('blue') ? { backgroundColor: 'rgba(96,165,250,0.15)', color: '#60a5fa' } : { backgroundColor: 'rgba(161,161,170,0.1)', color: '#a1a1aa' }) }}>
+                {displayEmail.charAt(0).toUpperCase()}
+              </div>
+              <span className="hidden sm:block font-medium">
+                {displayEmail.length > 18 ? displayEmail.slice(0, 18) + '...' : displayEmail}
+              </span>
               {badge && (
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${badge.cls}`}>
+                <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-md ${badge.cls}`}>
                   {badge.label}
                 </span>
               )}
-              <span className="text-xs text-zinc-400 hidden sm:block">
-                {displayEmail.length > 20 ? displayEmail.slice(0, 20) + '...' : displayEmail}
-              </span>
-              <button onClick={onLogout} className="px-3 py-1.5 bg-[#111122] border border-[#2a2a45] rounded-xl text-xs text-zinc-400 hover:text-white hover:border-zinc-500 transition-all">
-                Déconnexion
-              </button>
-            </div>
+            </button>
           ) : (
             <button onClick={onLoginClick} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition-all">
               Se connecter

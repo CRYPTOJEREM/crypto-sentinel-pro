@@ -1,6 +1,31 @@
-export default function LandingPage({ onStart, onPricing, isLoggedIn }) {
+export default function LandingPage({ onStart, onPricing, onLogin, onAccount, isLoggedIn }) {
   return (
     <div className="animate-fadeInUp">
+
+      {/* Floating nav */}
+      <nav className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/[0.04]" style={{ background: 'rgba(11,11,20,0.85)' }}>
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold text-white">CS</div>
+            <span className="text-sm font-bold text-white tracking-tight">Crypto Sentinel Pro</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={onPricing} className="text-sm text-zinc-400 hover:text-white transition-colors px-3 py-1.5">Tarifs</button>
+            {isLoggedIn ? (
+              <>
+                <button onClick={onStart} className="text-sm text-zinc-400 hover:text-white transition-colors px-3 py-1.5">Dashboard</button>
+                <button onClick={onAccount} className="px-4 py-1.5 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.06] rounded-xl text-sm text-white font-medium transition-all">
+                  Mon compte
+                </button>
+              </>
+            ) : (
+              <button onClick={onLogin} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-semibold text-white transition-all">
+                Se connecter
+              </button>
+            )}
+          </div>
+        </div>
+      </nav>
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto text-center py-24 px-4">

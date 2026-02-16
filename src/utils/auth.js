@@ -86,6 +86,44 @@ export function isLoggedIn() {
   return getCurrentUser() !== null;
 }
 
+export function getAllUsers() {
+  const users = getUsers();
+  return Object.entries(users).map(([email, data]) => ({
+    email,
+    role: data.role || 'free',
+    bitunixUid: data.bitunixUid || '',
+    createdAt: data.createdAt || 0,
+  }));
+}
+
+export function updateBitunixUid(email, uid) {
+  const users = getUsers();
+  const e = email.trim().toLowerCase();
+  if (users[e]) {
+    users[e].bitunixUid = uid.trim();
+    saveUsers(users);
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+    if (session.email === e) {
+      session.bitunixUid = uid.trim();
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+  }
+}
+
+export function setUserRole(email, role) {
+  const users = getUsers();
+  const e = email.trim().toLowerCase();
+  if (users[e]) {
+    users[e].role = role;
+    saveUsers(users);
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+    if (session.email === e) {
+      session.role = role;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+  }
+}
+
 export function upgradeToPremium(email) {
   const users = getUsers();
   const e = email.trim().toLowerCase();
