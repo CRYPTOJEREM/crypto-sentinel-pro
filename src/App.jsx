@@ -46,6 +46,7 @@ export default function App() {
   const [user, setUser] = useState(getCurrentUser());
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [alertBanner, setAlertBanner] = useState(null);
+  const [globalData, setGlobalData] = useState(null);
 
   const isAuthenticated = !!user;
   const hasAccess = user?.role === 'admin' || user?.role === 'premium';
@@ -57,7 +58,7 @@ export default function App() {
   const optWeights = optResult?.weights || null;
   const oppData =
     cryptos.length > 0
-      ? computeOpportunityIndex(fgVal, cryptos, btcPrice, btcAth, optWeights)
+      ? computeOpportunityIndex(fgVal, cryptos, btcPrice, btcAth, optWeights, globalData)
       : { score: 0, indicators: [] };
 
   const stats = useMemo(
@@ -73,9 +74,11 @@ export default function App() {
     const cachedFg = loadCache('fg');
     const cachedBtc = loadCache('btc');
     const cachedCryptos = loadCache('cryptos');
+    const cachedGlobal = loadCache('global');
     if (cachedFg) setFgHist(cachedFg);
     if (cachedBtc) setBtcHist(cachedBtc);
     if (cachedCryptos) setCryptos(cachedCryptos);
+    if (cachedGlobal) setGlobalData(cachedGlobal);
     if (cachedFg || cachedCryptos) {
       setLoading(false);
       setLastUpdate('cache');
@@ -84,7 +87,7 @@ export default function App() {
 
   const fetchAll = useCallback(async (isFirstLoad = false) => {
     const newErrors = [];
-    const { fgData, cryptoData, btcData } = await loadAllData(isFirstLoad, setCryptos);
+    const { fgData, cryptoData, btcData, globalData: gData } = await loadAllData(isFirstLoad, setCryptos);
 
     if (fgData) setFgHist(fgData);
     else if (!loadCache('fg')) newErrors.push('Fear & Greed Index indisponible');
@@ -94,6 +97,8 @@ export default function App() {
 
     if (btcData) setBtcHist(btcData);
     else if (!loadCache('btc')) newErrors.push('Historique BTC indisponible');
+
+    if (gData) setGlobalData(gData);
 
     setErrors(newErrors);
     setLoading(false);
@@ -110,7 +115,8 @@ export default function App() {
     if (finalCryptos && finalFg) {
       const currentFg = finalFg[finalFg.length - 1]?.value || 0;
       const btc = finalCryptos.find((c) => c.sym === 'BTC');
-      const opp = computeOpportunityIndex(currentFg, finalCryptos, btc?.price || 0, btc?.ath || 0, null);
+      const finalGlobal = gData || loadCache('global');
+      const opp = computeOpportunityIndex(currentFg, finalCryptos, btc?.price || 0, btc?.ath || 0, null, finalGlobal);
       saveOppScore(opp.score);
       setPrevOppScore((prev) => {
         const prevVal = prev === null ? opp.score : prev;
@@ -262,7 +268,7 @@ export default function App() {
         {activeTab === 'admin' && user?.role === 'admin' && <AdminPage />}
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
-          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v2.8</p>
+          <p className="text-sm text-zinc-500">Crypto Sentinel Pro v3.0</p>
           <p className="text-xs text-zinc-600">Données via Alternative.me &amp; CoinGecko. Ce site ne constitue pas un conseil en investissement.</p>
         </footer>
       </main>

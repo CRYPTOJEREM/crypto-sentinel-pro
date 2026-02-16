@@ -4,7 +4,7 @@ import { getFactorInterpretation, getSignalColor } from '../utils/interpretation
 import { getOppHistory } from '../utils/oppHistory';
 import AlertSettings from './AlertSettings';
 
-const FACTOR_COLORS = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#a855f7'];
+const FACTOR_COLORS = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#a855f7', '#ec4899', '#06b6d4', '#84cc16'];
 
 export default function OpportunityIndex({ score, indicators, showDetails, setShowDetails, optResult }) {
   const [anim, setAnim] = useState(0);

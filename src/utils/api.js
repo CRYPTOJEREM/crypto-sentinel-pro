@@ -85,6 +85,24 @@ export const fetchCryptos = async () => {
   }
 };
 
+// Global data — CoinGecko /global (BTC dominance, total market cap)
+export const fetchGlobalData = async () => {
+  try {
+    const res = await fetch(`${CONFIG.COINGECKO_API}/global`);
+    if (!res.ok) throw new Error(`Global API error: ${res.status}`);
+    const json = await res.json();
+    const data = {
+      btcDominance: json.data?.market_cap_percentage?.btc || 0,
+      totalMarketCap: json.data?.total_market_cap?.usd || 0,
+    };
+    saveCache('global', data);
+    return data;
+  } catch (err) {
+    console.error('Global data fetch error:', err);
+    return null;
+  }
+};
+
 // Sequential loading — staggers CoinGecko calls to avoid rate limit
 export const loadAllData = async (isFirstLoad, setCryptos) => {
   const fgData = await fetchWithRetry(fetchFearGreedData);
@@ -92,5 +110,7 @@ export const loadAllData = async (isFirstLoad, setCryptos) => {
   const cryptoData = await fetchWithRetry(fetchCryptos);
   await wait(2000);
   const btcData = await fetchWithRetry(fetchBtcHistory);
-  return { fgData, cryptoData, btcData };
+  await wait(1500);
+  const globalData = await fetchWithRetry(fetchGlobalData);
+  return { fgData, cryptoData, btcData, globalData };
 };
