@@ -45,7 +45,7 @@ export async function testTelegramBot() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: config.chatId,
-        text: '✅ <b>Crypto Sentinel Pro</b> — Bot connecte avec succes !',
+        text: '✅ <b>Crypto Sentinel Pro</b> Bot connecté avec succès !',
         parse_mode: 'HTML',
       }),
     });
@@ -57,7 +57,7 @@ export async function testTelegramBot() {
 
 export function formatPhaseAlert(alert) {
   const arrow = alert.type === 'phase_up' ? '🟢' : '🔴';
-  return `${arrow} <b>${alert.sym}</b> — ${alert.to}\n${alert.from} → ${alert.to}`;
+  return `${arrow} <b>${alert.sym}</b> ${alert.to}\n${alert.from} → ${alert.to}`;
 }
 
 export function formatScoreAlert(alert) {

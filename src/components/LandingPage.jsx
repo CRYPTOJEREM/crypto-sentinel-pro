@@ -31,7 +31,7 @@ export default function LandingPage({ onStart, onPricing, onLogin, onAccount, is
       <section className="max-w-4xl mx-auto text-center py-24 px-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 mb-8">
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-          <span className="text-xs font-medium text-blue-400">v2.9 — Mise à jour disponible</span>
+          <span className="text-xs font-medium text-blue-400">v2.9 disponible</span>
         </div>
 
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
@@ -40,7 +40,7 @@ export default function LandingPage({ onStart, onPricing, onLogin, onAccount, is
         </h1>
 
         <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-4">
-          Gagnez du temps sur votre analyse. Cet outil vous aide à lire les phases de marché complexes en un coup d'œil — que vous soyez en trading ou en spot, débutant ou confirmé.
+          Gagnez du temps sur votre analyse. Cet outil vous aide à lire les phases de marché complexes en un coup d'œil, que vous soyez en trading ou en spot, débutant ou confirmé.
         </p>
         <p className="text-sm text-zinc-600 mb-10 max-w-xl mx-auto">
           Pas de signaux de trading. Pas d'indicateur magique. Juste un outil pour faciliter vos propres décisions.
@@ -76,14 +76,14 @@ export default function LandingPage({ onStart, onPricing, onLogin, onAccount, is
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               ),
               title: 'Radar 210+ paires',
-              desc: 'Visualisez en un clin d\'œil la phase de chaque crypto sur 210+ paires Bitunix. Fini les heures à analyser chart par chart — tout est regroupé ici.',
+              desc: 'Visualisez en un clin d\'œil la phase de chaque crypto sur 210+ paires Bitunix. Fini les heures à analyser chart par chart, tout est regroupé ici.',
             },
             {
               icon: (
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
               ),
               title: 'Lecture de marché simplifiée',
-              desc: 'Notre outil synthétise les conditions de marché en un score clair. Vous n\'avez plus besoin de croiser 10 sources différentes — concentrez-vous sur vos décisions.',
+              desc: 'Notre outil synthétise les conditions de marché en un score clair. Vous n\'avez plus besoin de croiser 10 sources différentes. Concentrez-vous sur vos décisions.',
             },
             {
               icon: (
@@ -118,7 +118,7 @@ export default function LandingPage({ onStart, onPricing, onLogin, onAccount, is
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             { step: '01', title: 'Essayez gratuitement', desc: '7 jours d\'accès complet, sans engagement. Créez votre compte en 30 secondes et explorez tous les outils.' },
-            { step: '02', title: 'Comprenez les phases', desc: 'Le Radar affiche la phase de chaque crypto en temps réel. Accumulation, tendance, surachat — tout est lisible instantanément, même pour un débutant.' },
+            { step: '02', title: 'Comprenez les phases', desc: 'Le Radar affiche la phase de chaque crypto en temps réel. Accumulation, tendance, surachat : tout est lisible instantanément, même pour un débutant.' },
             { step: '03', title: 'Prenez vos décisions', desc: 'Spot ou trading, c\'est vous qui décidez. L\'outil vous fait gagner du temps d\'analyse, il ne décide jamais à votre place.' },
           ].map((s, i) => (
             <div key={i} className="relative text-center">

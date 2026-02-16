@@ -21,7 +21,7 @@ export default function AlertBanner({ alert, onClose }) {
           {isPhase ? (
             <>
               <p className="text-sm font-semibold text-white">
-                {alert.sym} — {alert.to}
+                {alert.sym} {alert.to}
               </p>
               <p className="text-xs text-zinc-400 mt-0.5">
                 Passe de <span className="font-semibold">{alert.from}</span> a <span className={`font-semibold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>{alert.to}</span>

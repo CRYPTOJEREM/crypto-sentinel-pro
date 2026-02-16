@@ -183,7 +183,7 @@ export async function checkCryptoPhaseChanges(cryptos, computeSentiment) {
     for (const a of important) {
       const arrow = a.type === 'phase_up' ? '↗' : '↘';
       sendBrowserNotif(
-        `${arrow} ${a.sym} — ${a.to}`,
+        `${arrow} ${a.sym} ${a.to}`,
         `${a.name} passe de ${a.from} a ${a.to}`
       );
     }

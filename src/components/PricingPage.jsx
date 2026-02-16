@@ -31,7 +31,7 @@ const PLANS = [
       '200+ cryptos avec analyse de phase',
       'Scanner Radar Bitunix (210+ paires)',
       'Alertes changement de phase crypto',
-      'Bot Telegram — alertes automatiques',
+      'Bot Telegram avec alertes automatiques',
       'Notifications navigateur temps réel',
       'Filtres & tri avancés',
       'Détails par crypto (24h, 7j, 30j)',

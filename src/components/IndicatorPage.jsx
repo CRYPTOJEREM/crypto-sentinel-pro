@@ -209,7 +209,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
             </div>
             <div className="flex items-center gap-2">
               <button onClick={handleTest} className="text-[10px] text-zinc-600 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05]">
-                Tester {testResult === 'ok' ? '— OK' : testResult === 'blocked' ? '— Bloqué' : ''}
+                Tester {testResult === 'ok' ? '✓' : testResult === 'blocked' ? '✗' : ''}
               </button>
               <button
                 onClick={() => updateSetting('enabled', !settings.enabled)}
@@ -313,7 +313,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
                 disabled={!tgConfig.botToken || !tgConfig.chatId}
                 className="w-full py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-[#26A5E4]/10 border border-[#26A5E4]/20 text-[#26A5E4] hover:bg-[#26A5E4]/20 disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                {tgTestResult === 'loading' ? 'Envoi...' : tgTestResult === 'ok' ? 'Envoyé !' : tgTestResult === 'error' ? 'Erreur — vérifiez les infos' : 'Tester le bot'}
+                {tgTestResult === 'loading' ? 'Envoi...' : tgTestResult === 'ok' ? 'Envoyé !' : tgTestResult === 'error' ? 'Erreur, vérifiez les infos' : 'Tester le bot'}
               </button>
               <p className="text-[10px] text-zinc-700 leading-relaxed">
                 Créez un bot via <span className="text-zinc-500">@BotFather</span> sur Telegram, récupérez le token et le Chat ID de votre canal/groupe.
@@ -336,7 +336,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
             <div>
               <h3 className="text-lg font-semibold text-white tracking-tight">Scanner Bitunix Perpetual</h3>
               <p className="text-sm text-zinc-600 mt-1">
-                <span className="text-emerald-400 font-semibold font-mono">{continuationCount}</span> crypto{continuationCount > 1 ? 's' : ''} en zone de continuation — <span className="text-zinc-500 font-mono">{scannerData.length}</span> paires disponibles
+                <span className="text-emerald-400 font-semibold font-mono">{continuationCount}</span> crypto{continuationCount > 1 ? 's' : ''} en zone de continuation sur <span className="text-zinc-500 font-mono">{scannerData.length}</span> paires disponibles
               </p>
             </div>
             <div className="flex items-center gap-3">

@@ -17,7 +17,7 @@ const UPDATES = [
     changes: [
       'Scanner filtre aux paires Bitunix Perpetual Futures uniquement (210+ paires)',
       'Cartes résumé par signal (Achat Fort, Bullish, Bearish, Neutre, etc.)',
-      'Suppression des références RSI(6) visibles — signaux simplifiés',
+      'Suppression des références RSI(6) visibles, signaux simplifiés',
       'Design zoom : tailles de police, paddings et espacements augmentés',
       'Largeur max étendue à 7xl pour meilleur confort',
     ],

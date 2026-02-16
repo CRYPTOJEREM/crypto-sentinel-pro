@@ -14,7 +14,7 @@ const SECTIONS = [
     content: [
       { q: "C'est quoi ?", a: "Un score composite propriétaire (0-100) basé sur un algorithme multi-facteurs qui synthétise les conditions de marché actuelles. L'outil vous aide à lire le marché plus rapidement, sans remplacer votre jugement." },
       { q: 'Comment le lire', a: "Score > 70 = conditions de marché favorables. Score 40-70 = neutre, pas de signal clair. Score < 40 = conditions défavorables. Chaque composante est visible dans la décomposition du signal." },
-      { q: 'Comment utiliser', a: "Utilisez ce score comme un outil de lecture rapide des conditions de marché. Il ne prédit pas le futur — il vous fait gagner du temps d'analyse. Vos décisions restent les vôtres." },
+      { q: 'Comment utiliser', a: "Utilisez ce score comme un outil de lecture rapide des conditions de marché. Il ne prédit pas le futur. Il vous fait gagner du temps d'analyse. Vos décisions restent les vôtres." },
     ],
   },
   {
