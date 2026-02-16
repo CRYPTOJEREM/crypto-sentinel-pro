@@ -6,6 +6,7 @@ export default function AuthModal({ onClose, onAuth }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [bitunixUid, setBitunixUid] = useState('');
+  const [telegramUsername, setTelegramUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +17,7 @@ export default function AuthModal({ onClose, onAuth }) {
 
     const result = mode === 'login'
       ? await login(email, password)
-      : await register(email, password, bitunixUid);
+      : await register(email, password, bitunixUid, telegramUsername);
 
     setLoading(false);
     if (result.ok) {
@@ -77,16 +78,28 @@ export default function AuthModal({ onClose, onAuth }) {
           </div>
 
           {mode === 'register' && (
-            <div>
-              <label className="block text-xs text-zinc-400 mb-1.5 font-medium">Bitunix UID</label>
-              <input
-                type="text"
-                value={bitunixUid}
-                onChange={(e) => setBitunixUid(e.target.value)}
-                placeholder="Votre UID Bitunix (optionnel)"
-                className="w-full bg-[#111122] border border-[#2a2a45] rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1.5 font-medium">Telegram</label>
+                <input
+                  type="text"
+                  value={telegramUsername}
+                  onChange={(e) => setTelegramUsername(e.target.value)}
+                  placeholder="@votre_username (optionnel)"
+                  className="w-full bg-[#111122] border border-[#2a2a45] rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1.5 font-medium">Bitunix UID</label>
+                <input
+                  type="text"
+                  value={bitunixUid}
+                  onChange={(e) => setBitunixUid(e.target.value)}
+                  placeholder="Votre UID Bitunix (optionnel)"
+                  className="w-full bg-[#111122] border border-[#2a2a45] rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+            </>
           )}
 
           {error && (

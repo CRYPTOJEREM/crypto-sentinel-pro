@@ -37,7 +37,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
   };
 
   return (
-    <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-5 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
+    <div className="card-hover bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-5 animate-fadeInUp flex flex-col" style={{ animationDelay: '0.1s' }}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-semibold text-zinc-300">Indice d'Opportunité</h2>
@@ -85,7 +85,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
           const interp = getFactorInterpretation(ind.name, ind.current);
           const isExpanded = expandedFactor === i;
           return (
-            <div key={i} className="bg-[#111122] border border-[#222238]/70 rounded-xl p-2.5 cursor-pointer transition-all hover:border-zinc-600" onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
+            <div key={i} className="card-hover bg-[#111122] border border-[#222238]/70 rounded-xl p-2.5 cursor-pointer hover:border-zinc-600" onClick={(e) => { e.stopPropagation(); setExpandedFactor(isExpanded ? null : i); }}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: fc }} />

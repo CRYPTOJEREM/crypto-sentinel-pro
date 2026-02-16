@@ -115,7 +115,7 @@ export default function AdminPage() {
                     </td>
                     <td className="py-4 px-8 text-center">
                       {roleChanged === u.email ? (
-                        <span className="text-xs text-emerald-400 font-medium">Mis a jour !</span>
+                        <span className="text-xs text-emerald-400 font-medium">Mis à jour !</span>
                       ) : (
                         <select
                           value={u.role}
@@ -137,7 +137,7 @@ export default function AdminPage() {
 
         {filteredUsers.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-sm text-zinc-600">Aucun utilisateur trouve.</p>
+            <p className="text-sm text-zinc-600">Aucun utilisateur trouvé.</p>
           </div>
         )}
       </div>

@@ -32,7 +32,7 @@ async function ensureAdmin() {
 }
 ensureAdmin();
 
-export async function register(email, password, bitunixUid = '') {
+export async function register(email, password, bitunixUid = '', telegramUsername = '') {
   const e = email.trim().toLowerCase();
   if (!e || !e.includes('@')) return { ok: false, error: 'Email invalide' };
   if (password.length < 6) return { ok: false, error: 'Mot de passe trop court (min 6 caractères)' };
@@ -42,10 +42,11 @@ export async function register(email, password, bitunixUid = '') {
 
   const hash = await hashPassword(password);
   const uid = (bitunixUid || '').trim();
-  users[e] = { hash, role: 'free', createdAt: Date.now(), bitunixUid: uid };
+  const tg = (telegramUsername || '').trim().replace(/^@/, '');
+  users[e] = { hash, role: 'free', createdAt: Date.now(), bitunixUid: uid, telegramUsername: tg };
   saveUsers(users);
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role: 'free', bitunixUid: uid, ts: Date.now() }));
-  return { ok: true, email: e, role: 'free', bitunixUid: uid };
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role: 'free', bitunixUid: uid, telegramUsername: tg, ts: Date.now() }));
+  return { ok: true, email: e, role: 'free', bitunixUid: uid, telegramUsername: tg };
 }
 
 export async function login(email, password) {
@@ -59,8 +60,9 @@ export async function login(email, password) {
 
   const role = user.role || 'free';
   const uid = user.bitunixUid || '';
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role, bitunixUid: uid, ts: Date.now() }));
-  return { ok: true, email: e, role, bitunixUid: uid };
+  const tg = user.telegramUsername || '';
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ email: e, role, bitunixUid: uid, telegramUsername: tg, ts: Date.now() }));
+  return { ok: true, email: e, role, bitunixUid: uid, telegramUsername: tg };
 }
 
 export function logout() {
@@ -71,7 +73,7 @@ export function getCurrentUser() {
   try {
     const session = JSON.parse(localStorage.getItem(SESSION_KEY));
     if (!session?.email) return null;
-    return { email: session.email, role: session.role || 'free', bitunixUid: session.bitunixUid || '' };
+    return { email: session.email, role: session.role || 'free', bitunixUid: session.bitunixUid || '', telegramUsername: session.telegramUsername || '' };
   } catch {
     return null;
   }
@@ -92,6 +94,7 @@ export function getAllUsers() {
     email,
     role: data.role || 'free',
     bitunixUid: data.bitunixUid || '',
+    telegramUsername: data.telegramUsername || '',
     createdAt: data.createdAt || 0,
   }));
 }

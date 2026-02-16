@@ -1,21 +1,21 @@
 const PLANS = [
   {
     id: 'free',
-    name: 'Decouverte',
+    name: 'Découverte',
     price: '0€',
     period: '',
-    desc: 'Explorez l\'outil et familiarisez-vous avec les phases de marche.',
+    desc: 'Explorez l\'outil et familiarisez-vous avec les phases de marché.',
     features: [
-      'Fear & Greed Index en temps reel',
+      'Fear & Greed Index en temps réel',
       'Graphique historique F&G + BTC',
-      'Donnees de marche basiques',
+      'Données de marché basiques',
     ],
     locked: [
-      'Indice d\'Opportunite',
+      'Indice d\'Opportunité',
       'Scanner Radar (210+ paires)',
       'Alertes de changement de phase',
       'Analyse de phase par crypto',
-      'Bot Telegram integre',
+      'Bot Telegram intégré',
       'Support prioritaire',
     ],
   },
@@ -26,15 +26,15 @@ const PLANS = [
     period: '/mois',
     desc: 'L\'outil complet pour gagner du temps sur votre analyse.',
     features: [
-      'Tout le plan Decouverte',
-      'Indice d\'Opportunite (algo proprietaire)',
+      'Tout le plan Découverte',
+      'Indice d\'Opportunité (algo propriétaire)',
       '200+ cryptos avec analyse de phase',
       'Scanner Radar Bitunix (210+ paires)',
       'Alertes changement de phase crypto',
       'Bot Telegram — alertes automatiques',
-      'Notifications navigateur temps reel',
-      'Filtres & tri avances',
-      'Details par crypto (24h, 7j, 30j)',
+      'Notifications navigateur temps réel',
+      'Filtres & tri avancés',
+      'Détails par crypto (24h, 7j, 30j)',
       'Market Cap & Volume',
     ],
     locked: [
@@ -47,13 +47,13 @@ const PLANS = [
     name: 'Pro',
     price: '9.99€',
     period: '/mois',
-    desc: 'L\'essentiel pour simplifier votre lecture de marche.',
+    desc: 'L\'essentiel pour simplifier votre lecture de marché.',
     features: [
-      'Tout le plan Decouverte',
-      'Indice d\'Opportunite (algo proprietaire)',
+      'Tout le plan Découverte',
+      'Indice d\'Opportunité (algo propriétaire)',
       '200+ cryptos avec analyse de phase',
-      'Filtres & tri avances',
-      'Details par crypto (24h, 7j, 30j)',
+      'Filtres & tri avancés',
+      'Détails par crypto (24h, 7j, 30j)',
       'Market Cap & Volume',
     ],
     locked: [
@@ -73,7 +73,7 @@ export default function PricingPage({ userRole, onLoginClick }) {
     <div className="animate-fadeInUp max-w-5xl mx-auto">
       <div className="mb-10 text-center">
         <h2 className="text-3xl font-bold text-white mb-3">Choisissez votre plan</h2>
-        <p className="text-base text-zinc-500 max-w-lg mx-auto">Un outil pour faciliter votre lecture de marche, pas un service de signaux. Spot ou trading, tous niveaux.</p>
+        <p className="text-base text-zinc-500 max-w-lg mx-auto">Un outil pour faciliter votre lecture de marché, pas un service de signaux. Spot ou trading, tous niveaux.</p>
       </div>
 
       {/* Bandeau essai gratuit */}
@@ -90,7 +90,7 @@ export default function PricingPage({ userRole, onLoginClick }) {
           return (
             <div
               key={plan.id}
-              className={`relative rounded-3xl p-7 flex flex-col border transition-all duration-300 ${
+              className={`card-hover relative rounded-3xl p-7 flex flex-col border ${
                 isBusiness
                   ? 'border-blue-500/40 bg-gradient-to-b from-blue-500/[0.06] to-[#16162a] scale-[1.03] shadow-xl shadow-blue-500/5'
                   : 'border-[#2a2a45]/80 bg-[#16162a]'
@@ -98,7 +98,7 @@ export default function PricingPage({ userRole, onLoginClick }) {
             >
               {isBusiness && (
                 <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
-                  Recommande
+                  Recommandé
                 </span>
               )}
 
@@ -174,12 +174,12 @@ export default function PricingPage({ userRole, onLoginClick }) {
       </div>
 
       <div className="mt-4 text-center">
-        <p className="text-xs text-zinc-600">Sans engagement. Annulation en un clic a tout moment.</p>
+        <p className="text-xs text-zinc-600">Sans engagement. Annulation en un clic à tout moment.</p>
       </div>
 
       <div className="mt-8 max-w-2xl mx-auto text-center">
         <p className="text-[11px] text-zinc-700 leading-relaxed">
-          Crypto Sentinel Pro est un outil d'aide a la lecture des phases de marche. Ce n'est ni un service de signaux de trading, ni un indicateur garantissant des performances. Aucune recommandation d'achat ou de vente n'est fournie. Les decisions de trading ou d'investissement restent sous votre entiere responsabilite.
+          Crypto Sentinel Pro est un outil d'aide à la lecture des phases de marché. Ce n'est ni un service de signaux de trading, ni un indicateur garantissant des performances. Aucune recommandation d'achat ou de vente n'est fournie. Les décisions de trading ou d'investissement restent sous votre entière responsabilité.
         </p>
       </div>
     </div>

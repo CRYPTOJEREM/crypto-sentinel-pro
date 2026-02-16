@@ -4,10 +4,10 @@ const UPDATES = [
     date: '15 Fev 2026',
     title: 'Page d\'accueil marketing',
     changes: [
-      'Nouvelle page d\'accueil style Apple avec presentation du produit',
-      'Hero, features, fonctionnement, chiffres cles et CTA',
-      'Page d\'accueil comme onglet par defaut a l\'arrivee sur le site',
-      'Onglet Accueil ajoute dans la navigation',
+      'Nouvelle page d\'accueil style Apple avec présentation du produit',
+      'Hero, features, fonctionnement, chiffres clés et CTA',
+      'Page d\'accueil comme onglet par défaut à l\'arrivée sur le site',
+      'Onglet Accueil ajouté dans la navigation',
     ],
   },
   {
@@ -16,10 +16,10 @@ const UPDATES = [
     title: 'Scanner Bitunix Perpetual',
     changes: [
       'Scanner filtre aux paires Bitunix Perpetual Futures uniquement (210+ paires)',
-      'Cartes resume par signal (Achat Fort, Bullish, Bearish, Neutre, etc.)',
-      'Suppression des references RSI(6) visibles — signaux simplifies',
-      'Design zoom : tailles de police, paddings et espacements augmentes',
-      'Largeur max etendue a 7xl pour meilleur confort',
+      'Cartes résumé par signal (Achat Fort, Bullish, Bearish, Neutre, etc.)',
+      'Suppression des références RSI(6) visibles — signaux simplifiés',
+      'Design zoom : tailles de police, paddings et espacements augmentés',
+      'Largeur max étendue à 7xl pour meilleur confort',
     ],
   },
   {
@@ -30,8 +30,8 @@ const UPDATES = [
       'Scanner RSI(6) + Sentiment : tableau complet de toutes les cryptos avec signaux',
       'Signal global combine RSI(6) et score sentiment de l\'algo (ACHAT FORT, BULLISH, PRUDENCE...)',
       'Tri par zone de continuation, RSI, sentiment, variation 24h',
-      'Bitunix UID demande a l\'inscription (stocke dans le profil)',
-      'Alertes activees par defaut a la creation de compte',
+      'Bitunix UID demandé à l\'inscription (stocké dans le profil)',
+      'Alertes activées par défaut à la création de compte',
     ],
   },
   {
@@ -39,8 +39,8 @@ const UPDATES = [
     date: '15 Fev 2025',
     title: 'RSI(6) & Indicateur',
     changes: [
-      'Nouvel onglet Indicateur dedie',
-      'RSI(6) integre dans l\'analyse (zone 60-64 = continuation haussiere)',
+      'Nouvel onglet Indicateur dédié',
+      'RSI(6) intégré dans l\'analyse (zone 60-64 = continuation haussière)',
       'Historique du signal avec graphique SVG',
       'Decomposition du signal en temps reel',
       'Configuration et historique des alertes',

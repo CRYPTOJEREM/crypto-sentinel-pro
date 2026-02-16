@@ -143,7 +143,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
       <div className="text-center pt-6 pb-2">
         <h2 className="text-4xl font-bold text-white tracking-tight mb-3">Radar Crypto Sentinel</h2>
         <p className="text-base text-zinc-500 max-w-xl mx-auto leading-relaxed">
-          Analysez les phases de marche en un coup d'oeil. Un outil pour simplifier vos decisions.
+          Analysez les phases de marché en un coup d'œil. Un outil pour simplifier vos décisions.
         </p>
       </div>
 
@@ -190,7 +190,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
           { label: 'Prudence', count: signalCounts.prudence, color: '#fb923c', bg: 'rgba(251,146,60,0.06)' },
           { label: 'Bearish', count: signalCounts.bearish, color: '#f87171', bg: 'rgba(248,113,113,0.05)' },
         ].map((card) => (
-          <div key={card.label} className="rounded-2xl border border-white/[0.05] p-4 text-center transition-all hover:border-white/[0.1]" style={{ background: card.bg }}>
+          <div key={card.label} className="card-hover rounded-2xl border border-white/[0.05] p-4 text-center hover:border-white/[0.1]" style={{ background: card.bg }}>
             <p className="text-3xl font-bold font-mono mb-1" style={{ color: card.color }}>{card.count}</p>
             <p className="text-xs font-medium" style={{ color: card.color, opacity: 0.8 }}>{card.label}</p>
           </div>
@@ -209,7 +209,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
             </div>
             <div className="flex items-center gap-2">
               <button onClick={handleTest} className="text-[10px] text-zinc-600 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05]">
-                Tester {testResult === 'ok' ? '— OK' : testResult === 'blocked' ? '— Bloque' : ''}
+                Tester {testResult === 'ok' ? '— OK' : testResult === 'blocked' ? '— Bloqué' : ''}
               </button>
               <button
                 onClick={() => updateSetting('enabled', !settings.enabled)}
@@ -313,10 +313,10 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
                 disabled={!tgConfig.botToken || !tgConfig.chatId}
                 className="w-full py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-[#26A5E4]/10 border border-[#26A5E4]/20 text-[#26A5E4] hover:bg-[#26A5E4]/20 disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                {tgTestResult === 'loading' ? 'Envoi...' : tgTestResult === 'ok' ? 'Envoye !' : tgTestResult === 'error' ? 'Erreur — verifiez les infos' : 'Tester le bot'}
+                {tgTestResult === 'loading' ? 'Envoi...' : tgTestResult === 'ok' ? 'Envoyé !' : tgTestResult === 'error' ? 'Erreur — vérifiez les infos' : 'Tester le bot'}
               </button>
               <p className="text-[10px] text-zinc-700 leading-relaxed">
-                Creez un bot via <span className="text-zinc-500">@BotFather</span> sur Telegram, recuperez le token et le Chat ID de votre canal/groupe.
+                Créez un bot via <span className="text-zinc-500">@BotFather</span> sur Telegram, récupérez le token et le Chat ID de votre canal/groupe.
               </p>
             </div>
           ) : (
@@ -440,7 +440,7 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
           </table>
         </div>
         {filteredScanner.length > 100 && (
-          <p className="text-xs text-zinc-700 py-4 text-center border-t border-white/[0.03]">Affichage limite a 100 cryptos</p>
+          <p className="text-xs text-zinc-700 py-4 text-center border-t border-white/[0.03]">Affichage limité à 100 cryptos</p>
         )}
       </div>
 
@@ -504,17 +504,17 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
         )}
       </div>
 
-      {/* Decomposition du signal */}
+      {/* Décomposition du signal */}
       <div className="rounded-3xl border border-white/[0.06] p-8" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
-        <h3 className="text-lg font-semibold text-white tracking-tight mb-6">Decomposition du signal</h3>
+        <h3 className="text-lg font-semibold text-white tracking-tight mb-6">Décomposition du signal</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {(indicators || []).map((ind, i) => {
             const colors = ['#60a5fa', '#34d399', '#fbbf24', '#fb923c', '#c084fc', '#22d3ee'];
             const fc = colors[i] || '#60a5fa';
-            const zone = ind.current >= 70 ? 'Positif' : ind.current <= 30 ? 'Negatif' : 'Neutre';
+            const zone = ind.current >= 70 ? 'Positif' : ind.current <= 30 ? 'Négatif' : 'Neutre';
             const zoneColor = ind.current >= 70 ? '#34d399' : ind.current <= 30 ? '#f87171' : '#fbbf24';
             return (
-              <div key={i} className="rounded-2xl border border-white/[0.04] p-5 transition-all duration-200 hover:border-white/[0.08]" style={{ background: 'rgba(255,255,255,0.015)' }}>
+              <div key={i} className="card-hover rounded-2xl border border-white/[0.04] p-5 hover:border-white/[0.08]" style={{ background: 'rgba(255,255,255,0.015)' }}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: fc }} />
@@ -542,21 +542,21 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
             <span className="text-sm font-semibold text-emerald-400">Achat fort</span>
           </div>
-          <p className="text-sm text-zinc-600 leading-relaxed">Zone de continuation confirmee par un sentiment positif. Signal haussier fort.</p>
+          <p className="text-sm text-zinc-600 leading-relaxed">Zone de continuation confirmée par un sentiment positif. Signal haussier fort.</p>
         </div>
         <div className="rounded-2xl border border-yellow-500/10 p-6" style={{ background: 'rgba(251,191,36,0.02)' }}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
             <span className="text-sm font-semibold text-yellow-400">Neutre</span>
           </div>
-          <p className="text-sm text-zinc-600 leading-relaxed">Pas de signal clair. Sentiment mitige. Attendre confirmation.</p>
+          <p className="text-sm text-zinc-600 leading-relaxed">Pas de signal clair. Sentiment mitigé. Attendre confirmation.</p>
         </div>
         <div className="rounded-2xl border border-red-500/10 p-6" style={{ background: 'rgba(248,113,113,0.02)' }}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
             <span className="text-sm font-semibold text-red-400">Prudence</span>
           </div>
-          <p className="text-sm text-zinc-600 leading-relaxed">Surachat ou conditions defavorables. Renforcer la gestion du risque.</p>
+          <p className="text-sm text-zinc-600 leading-relaxed">Surachat ou conditions défavorables. Renforcer la gestion du risque.</p>
         </div>
       </div>
     </div>

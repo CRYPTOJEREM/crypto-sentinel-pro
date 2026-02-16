@@ -26,7 +26,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
 
       <div className="text-center pt-6 pb-2">
         <h2 className="text-3xl font-bold text-white tracking-tight mb-2">Mon compte</h2>
-        <p className="text-base text-zinc-500">Gerez votre profil et vos preferences.</p>
+        <p className="text-base text-zinc-500">Gérez votre profil et vos préférences.</p>
       </div>
 
       {/* Profil */}
@@ -56,7 +56,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
       {/* Bitunix UID */}
       <div className="rounded-3xl border border-white/[0.06] p-8" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
         <h3 className="text-lg font-semibold text-white mb-2">Bitunix UID</h3>
-        <p className="text-sm text-zinc-500 mb-6">Associez votre compte Bitunix pour un suivi personnalise.</p>
+        <p className="text-sm text-zinc-500 mb-6">Associez votre compte Bitunix pour un suivi personnalisé.</p>
 
         <div className="flex gap-3">
           <input
@@ -70,7 +70,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
             onClick={handleSaveUid}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all duration-300"
           >
-            {saved ? 'Enregistre !' : 'Enregistrer'}
+            {saved ? 'Enregistré !' : 'Enregistrer'}
           </button>
         </div>
 
@@ -91,7 +91,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
             <div>
               <p className="text-xl font-bold text-white">Plan {role.label}</p>
               <p className="text-sm text-zinc-500 mt-1">
-                {user?.role === 'admin' ? 'Acces complet + administration' : user?.role === 'premium' ? 'Acces a toutes les fonctionnalites' : 'Fonctionnalites de base'}
+                {user?.role === 'admin' ? 'Accès complet + administration' : user?.role === 'premium' ? 'Accès à toutes les fonctionnalités' : 'Fonctionnalités de base'}
               </p>
             </div>
             <span className="text-2xl font-bold font-mono" style={{ color: role.color }}>
@@ -106,7 +106,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
               { text: 'Indice d\'Opportunite', ok: user?.role !== 'free' },
               { text: 'Scanner Radar (210+ paires)', ok: user?.role !== 'free' },
               { text: 'Alertes configurables', ok: user?.role !== 'free' },
-              { text: '200+ cryptos detaillees', ok: user?.role !== 'free' },
+              { text: '200+ cryptos détaillées', ok: user?.role !== 'free' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-2.5">
                 <svg className={`w-4 h-4 shrink-0 ${f.ok ? 'text-emerald-400' : 'text-zinc-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -128,7 +128,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-white mb-1">Administration</h3>
-              <p className="text-sm text-zinc-500">Gerez les utilisateurs et leurs roles.</p>
+              <p className="text-sm text-zinc-500">Gérez les utilisateurs et leurs rôles.</p>
             </div>
             <button
               onClick={onGoAdmin}
@@ -146,7 +146,7 @@ export default function AccountPage({ user, onUpdateUser, onLogout, onGoAdmin })
           onClick={onLogout}
           className="px-6 py-3 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-zinc-400 hover:text-white text-sm font-medium rounded-xl transition-all duration-300"
         >
-          Se deconnecter
+          Se déconnecter
         </button>
       </div>
     </div>
