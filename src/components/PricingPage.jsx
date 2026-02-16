@@ -1,9 +1,17 @@
+import { useState } from 'react';
+
+const BILLING_PERIODS = [
+  { id: '1', label: 'Mensuel', months: 1, discount: 0 },
+  { id: '3', label: '3 mois', months: 3, discount: 10 },
+  { id: '6', label: '6 mois', months: 6, discount: 20 },
+  { id: '12', label: '12 mois', months: 12, discount: 30 },
+];
+
 const PLANS = [
   {
     id: 'free',
     name: 'Découverte',
-    price: '0€',
-    period: '',
+    monthlyPrice: 0,
     desc: 'Explorez l\'outil et familiarisez-vous avec les phases de marché.',
     features: [
       'Fear & Greed Index en temps réel',
@@ -22,8 +30,7 @@ const PLANS = [
   {
     id: 'business',
     name: 'Business',
-    price: '14.99€',
-    period: '/mois',
+    monthlyPrice: 14.99,
     desc: 'L\'outil complet pour gagner du temps sur votre analyse.',
     features: [
       'Tout le plan Découverte',
@@ -45,8 +52,7 @@ const PLANS = [
   {
     id: 'pro',
     name: 'Pro',
-    price: '9.99€',
-    period: '/mois',
+    monthlyPrice: 9.99,
     desc: 'L\'essentiel pour simplifier votre lecture de marché.',
     features: [
       'Tout le plan Découverte',
@@ -66,8 +72,23 @@ const PLANS = [
   },
 ];
 
+function getPrice(monthlyPrice, period) {
+  if (monthlyPrice === 0) return { display: '0€', total: null, perMonth: null, saved: null };
+  const discounted = monthlyPrice * (1 - period.discount / 100);
+  const perMonth = Math.round(discounted * 100) / 100;
+  const total = Math.round(perMonth * period.months * 100) / 100;
+  const saved = period.discount > 0 ? Math.round((monthlyPrice * period.months - total) * 100) / 100 : null;
+  return {
+    display: period.months === 1 ? `${perMonth.toFixed(2).replace('.', ',')}€` : `${total.toFixed(2).replace('.', ',')}€`,
+    perMonth: period.months > 1 ? `${perMonth.toFixed(2).replace('.', ',')}€/mois` : null,
+    total: period.months > 1 ? total : null,
+    saved,
+  };
+}
+
 export default function PricingPage({ userRole, onLoginClick }) {
   const hasAccess = userRole === 'admin' || userRole === 'premium';
+  const [billingPeriod, setBillingPeriod] = useState(BILLING_PERIODS[0]);
 
   return (
     <div className="animate-fadeInUp max-w-5xl mx-auto">
@@ -82,10 +103,37 @@ export default function PricingPage({ userRole, onLoginClick }) {
         <p className="text-xs text-zinc-500">Testez l'outil complet sans engagement. Aucun paiement requis pour commencer.</p>
       </div>
 
+      {/* Sélecteur de période */}
+      <div className="flex justify-center mb-8">
+        <div className="inline-flex bg-[#111122] rounded-xl p-1 border border-[#2a2a45]">
+          {BILLING_PERIODS.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setBillingPeriod(p)}
+              className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                billingPeriod.id === p.id
+                  ? 'bg-[#2a2a45] text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              {p.label}
+              {p.discount > 0 && (
+                <span className={`ml-1.5 text-[10px] font-bold ${
+                  billingPeriod.id === p.id ? 'text-emerald-400' : 'text-emerald-400/60'
+                }`}>
+                  -{p.discount}%
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         {PLANS.map((plan) => {
           const isCurrent = (plan.id === 'free' && !hasAccess) || ((plan.id === 'pro' || plan.id === 'business') && hasAccess);
           const isBusiness = plan.id === 'business';
+          const pricing = getPrice(plan.monthlyPrice, billingPeriod);
 
           return (
             <div
@@ -106,9 +154,19 @@ export default function PricingPage({ userRole, onLoginClick }) {
                 <h3 className={`text-lg font-semibold mb-1 ${isBusiness ? 'text-blue-400' : 'text-white'}`}>{plan.name}</h3>
                 <p className="text-xs text-zinc-500 mb-4">{plan.desc}</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold font-mono text-white">{plan.price}</span>
-                  {plan.period && <span className="text-sm text-zinc-500">{plan.period}</span>}
+                  <span className="text-4xl font-bold font-mono text-white">{pricing.display}</span>
+                  {plan.monthlyPrice > 0 && (
+                    <span className="text-sm text-zinc-500">
+                      {billingPeriod.months === 1 ? '/mois' : `/${billingPeriod.months} mois`}
+                    </span>
+                  )}
                 </div>
+                {pricing.perMonth && (
+                  <p className="text-[11px] text-zinc-400 mt-1 font-medium">soit {pricing.perMonth}</p>
+                )}
+                {pricing.saved && (
+                  <p className="text-[11px] text-emerald-400/80 mt-1 font-medium">Économisez {pricing.saved.toFixed(2).replace('.', ',')}€</p>
+                )}
                 {plan.trial && (
                   <p className="text-[11px] text-blue-400/70 mt-2 font-medium">7 jours gratuits inclus</p>
                 )}
@@ -150,7 +208,7 @@ export default function PricingPage({ userRole, onLoginClick }) {
                       : 'bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.06] text-zinc-300'
                   }`}
                 >
-                  {isBusiness ? 'Essayer 7 jours gratuits' : 'Essayer 7 jours gratuits'}
+                  Essayer 7 jours gratuits
                 </a>
               ) : (
                 <button
