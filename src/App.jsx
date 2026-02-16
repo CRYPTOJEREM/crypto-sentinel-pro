@@ -6,7 +6,7 @@ import { computeSentiment, computeOpportunityIndex } from './utils/sentiment';
 import { runBacktestOptimization } from './utils/backtest';
 import { getCurrentUser, logout as authLogout } from './utils/auth';
 import { saveOppScore } from './utils/oppHistory';
-import { checkAndNotify } from './utils/alerts';
+import { checkAndNotify, checkCryptoPhaseChanges } from './utils/alerts';
 
 import Header from './components/Header';
 import FearGreedIndex from './components/FearGreedIndex';
@@ -118,6 +118,21 @@ export default function App() {
           if (alert) setAlertBanner(alert);
         });
         return opp.score;
+      });
+
+      // Check crypto phase changes
+      checkCryptoPhaseChanges(finalCryptos, computeSentiment).then((phaseAlerts) => {
+        if (phaseAlerts.length > 0) {
+          const first = phaseAlerts[0];
+          setAlertBanner({
+            type: first.type,
+            score: first.score,
+            sym: first.sym,
+            from: first.from,
+            to: first.to,
+            count: phaseAlerts.length,
+          });
+        }
       });
     }
   }, []);

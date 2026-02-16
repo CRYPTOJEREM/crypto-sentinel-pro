@@ -434,19 +434,34 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
         <div className="rounded-3xl border border-white/[0.06] p-8" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
           <h3 className="text-lg font-semibold text-white tracking-tight mb-6">Historique alertes</h3>
           {alertHistory.length > 0 ? (
-            <div className="space-y-1 max-h-[240px] overflow-y-auto">
-              {alertHistory.slice(0, 20).map((a, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-white/[0.03] last:border-0">
-                  <div className="flex items-center gap-3">
-                    <span className={`w-2 h-2 rounded-full ${a.type === 'buy' ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                    <span className="text-sm text-zinc-400">{a.type === 'buy' ? "Achat" : 'Prudence'}</span>
-                    <span className="text-sm font-mono font-bold" style={{ color: a.type === 'buy' ? '#34d399' : '#f87171' }}>{a.score}</span>
+            <div className="space-y-1 max-h-[300px] overflow-y-auto">
+              {alertHistory.slice(0, 30).map((a, i) => {
+                const isPhase = a.type === 'phase_up' || a.type === 'phase_down';
+                const isPositive = a.type === 'buy' || a.type === 'phase_up';
+                return (
+                  <div key={i} className="flex items-center justify-between py-3 border-b border-white/[0.03] last:border-0">
+                    <div className="flex items-center gap-3">
+                      <span className={`w-2 h-2 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                      {isPhase ? (
+                        <>
+                          <span className="text-sm font-semibold text-zinc-300">{a.sym}</span>
+                          <span className="text-xs text-zinc-600">{a.from}</span>
+                          <span className="text-xs text-zinc-600">→</span>
+                          <span className="text-xs font-semibold" style={{ color: isPositive ? '#34d399' : '#f87171' }}>{a.to}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm text-zinc-400">{a.type === 'buy' ? "Achat" : 'Prudence'}</span>
+                          <span className="text-sm font-mono font-bold" style={{ color: isPositive ? '#34d399' : '#f87171' }}>{a.score}</span>
+                        </>
+                      )}
+                    </div>
+                    <span className="text-xs text-zinc-700 font-mono">
+                      {new Date(a.ts).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                  <span className="text-xs text-zinc-700 font-mono">
-                    {new Date(a.ts).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="flex items-center justify-center h-24">
