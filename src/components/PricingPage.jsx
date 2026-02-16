@@ -4,7 +4,7 @@ const PLANS = [
     name: 'Decouverte',
     price: '0€',
     period: '',
-    desc: 'Pour explorer le marche crypto.',
+    desc: 'Explorez l\'outil et familiarisez-vous avec les phases de marche.',
     features: [
       'Fear & Greed Index en temps reel',
       'Graphique historique F&G + BTC',
@@ -13,8 +13,9 @@ const PLANS = [
     locked: [
       'Indice d\'Opportunite',
       'Scanner Radar (210+ paires)',
-      'Alertes & notifications',
-      'Scores sentiment par crypto',
+      'Alertes de changement de phase',
+      'Analyse de phase par crypto',
+      'Bot Telegram integre',
       'Support prioritaire',
     ],
   },
@@ -23,13 +24,14 @@ const PLANS = [
     name: 'Business',
     price: '14.99€',
     period: '/mois',
-    desc: 'Le choix ideal pour les traders actifs.',
+    desc: 'L\'outil complet pour gagner du temps sur votre analyse.',
     features: [
       'Tout le plan Decouverte',
-      'Indice d\'Opportunite (backtest 2 ans)',
-      '200+ cryptos avec sentiment',
+      'Indice d\'Opportunite (algo proprietaire)',
+      '200+ cryptos avec analyse de phase',
       'Scanner Radar Bitunix (210+ paires)',
       'Alertes changement de phase crypto',
+      'Bot Telegram — alertes automatiques',
       'Notifications navigateur temps reel',
       'Filtres & tri avances',
       'Details par crypto (24h, 7j, 30j)',
@@ -38,17 +40,18 @@ const PLANS = [
     locked: [
       'Support prioritaire',
     ],
+    trial: true,
   },
   {
     id: 'pro',
     name: 'Pro',
     price: '9.99€',
     period: '/mois',
-    desc: 'Acces aux outils essentiels.',
+    desc: 'L\'essentiel pour simplifier votre lecture de marche.',
     features: [
       'Tout le plan Decouverte',
-      'Indice d\'Opportunite (backtest 2 ans)',
-      '200+ cryptos avec sentiment',
+      'Indice d\'Opportunite (algo proprietaire)',
+      '200+ cryptos avec analyse de phase',
       'Filtres & tri avances',
       'Details par crypto (24h, 7j, 30j)',
       'Market Cap & Volume',
@@ -56,8 +59,10 @@ const PLANS = [
     locked: [
       'Scanner Radar Bitunix',
       'Alertes changement de phase',
+      'Bot Telegram',
       'Support prioritaire',
     ],
+    trial: true,
   },
 ];
 
@@ -68,7 +73,13 @@ export default function PricingPage({ userRole, onLoginClick }) {
     <div className="animate-fadeInUp max-w-5xl mx-auto">
       <div className="mb-10 text-center">
         <h2 className="text-3xl font-bold text-white mb-3">Choisissez votre plan</h2>
-        <p className="text-base text-zinc-500">Debloquez toutes les fonctionnalites de Crypto Sentinel Pro</p>
+        <p className="text-base text-zinc-500 max-w-lg mx-auto">Un outil pour faciliter votre lecture de marche, pas un service de signaux. Spot ou trading, tous niveaux.</p>
+      </div>
+
+      {/* Bandeau essai gratuit */}
+      <div className="mb-8 rounded-2xl border border-blue-500/20 bg-blue-500/[0.04] p-5 text-center">
+        <p className="text-sm text-blue-400 font-semibold mb-1">7 jours d'essai gratuit sur tous les plans payants</p>
+        <p className="text-xs text-zinc-500">Testez l'outil complet sans engagement. Aucun paiement requis pour commencer.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -95,9 +106,12 @@ export default function PricingPage({ userRole, onLoginClick }) {
                 <h3 className={`text-lg font-semibold mb-1 ${isBusiness ? 'text-blue-400' : 'text-white'}`}>{plan.name}</h3>
                 <p className="text-xs text-zinc-500 mb-4">{plan.desc}</p>
                 <div className="flex items-baseline gap-1">
-                  <span className={`text-4xl font-bold font-mono ${isBusiness ? 'text-white' : 'text-white'}`}>{plan.price}</span>
+                  <span className="text-4xl font-bold font-mono text-white">{plan.price}</span>
                   {plan.period && <span className="text-sm text-zinc-500">{plan.period}</span>}
                 </div>
+                {plan.trial && (
+                  <p className="text-[11px] text-blue-400/70 mt-2 font-medium">7 jours gratuits inclus</p>
+                )}
               </div>
 
               <ul className="space-y-2.5 mb-7 flex-1">
@@ -136,7 +150,7 @@ export default function PricingPage({ userRole, onLoginClick }) {
                       : 'bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.06] text-zinc-300'
                   }`}
                 >
-                  {isBusiness ? 'Passer a Business' : 'Passer a Pro'}
+                  {isBusiness ? 'Essayer 7 jours gratuits' : 'Essayer 7 jours gratuits'}
                 </a>
               ) : (
                 <button
@@ -147,7 +161,7 @@ export default function PricingPage({ userRole, onLoginClick }) {
                       : 'bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.06] text-zinc-300'
                   }`}
                 >
-                  Se connecter
+                  {plan.trial ? 'Essayer 7 jours gratuits' : 'Se connecter'}
                 </button>
               )}
             </div>
@@ -156,11 +170,17 @@ export default function PricingPage({ userRole, onLoginClick }) {
       </div>
 
       <div className="mt-6 text-center">
-        <p className="text-xs text-blue-400/60">Le plan Business est le plus populaire aupres de nos traders.</p>
+        <p className="text-xs text-blue-400/60">Le plan Business est le plus choisi par nos utilisateurs.</p>
       </div>
 
       <div className="mt-4 text-center">
-        <p className="text-xs text-zinc-600">Paiement securise. Annulation possible a tout moment.</p>
+        <p className="text-xs text-zinc-600">Sans engagement. Annulation en un clic a tout moment.</p>
+      </div>
+
+      <div className="mt-8 max-w-2xl mx-auto text-center">
+        <p className="text-[11px] text-zinc-700 leading-relaxed">
+          Crypto Sentinel Pro est un outil d'aide a la lecture des phases de marche. Ce n'est ni un service de signaux de trading, ni un indicateur garantissant des performances. Aucune recommandation d'achat ou de vente n'est fournie. Les decisions de trading ou d'investissement restent sous votre entiere responsabilite.
+        </p>
       </div>
     </div>
   );

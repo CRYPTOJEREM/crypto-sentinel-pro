@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { getOppHistory } from '../utils/oppHistory';
 import { getAlertHistory, getAlertSettings, saveAlertSettings, testNotification } from '../utils/alerts';
+import { getTelegramConfig, saveTelegramConfig, testTelegramBot } from '../utils/telegram';
 import { getOppClass } from '../utils/classifications';
 import { computeRSI, computeSentiment } from '../utils/sentiment';
 import { isBitunixPerp } from '../utils/bitunixPairs';
@@ -32,6 +33,9 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
   const [testResult, setTestResult] = useState(null);
   const [scanSearch, setScanSearch] = useState('');
   const [scanSort, setScanSort] = useState('continuation');
+  const [tgConfig, setTgConfig] = useState(getTelegramConfig);
+  const [tgTestResult, setTgTestResult] = useState(null);
+  const [showTgConfig, setShowTgConfig] = useState(false);
 
   const oppHistory = getOppHistory();
   const alertHistory = getAlertHistory().reverse();
@@ -53,6 +57,19 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
     const ok = await testNotification();
     setTestResult(ok ? 'ok' : 'blocked');
     setTimeout(() => setTestResult(null), 3000);
+  };
+
+  const updateTgConfig = (key, value) => {
+    const next = { ...tgConfig, [key]: value };
+    setTgConfig(next);
+    saveTelegramConfig(next);
+  };
+
+  const handleTgTest = async () => {
+    setTgTestResult('loading');
+    const ok = await testTelegramBot();
+    setTgTestResult(ok ? 'ok' : 'error');
+    setTimeout(() => setTgTestResult(null), 4000);
   };
 
   const getDateLabels = () => {
@@ -178,6 +195,138 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
             <p className="text-xs font-medium" style={{ color: card.color, opacity: 0.8 }}>{card.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Notifications + Telegram — compact card */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Historique notifs */}
+        <div className="lg:col-span-2 rounded-2xl border border-white/[0.06] p-5" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <svg className="w-4.5 h-4.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+              <h3 className="text-sm font-semibold text-white">Notifications</h3>
+              <span className="text-[10px] text-zinc-600 font-mono">{alertHistory.length}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={handleTest} className="text-[10px] text-zinc-600 hover:text-white transition-colors px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05]">
+                Tester {testResult === 'ok' ? '— OK' : testResult === 'blocked' ? '— Bloque' : ''}
+              </button>
+              <button
+                onClick={() => updateSetting('enabled', !settings.enabled)}
+                className={`relative w-9 h-5 rounded-full transition-all duration-300 ${settings.enabled ? 'bg-emerald-500/80' : 'bg-white/[0.06]'}`}
+              >
+                <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${settings.enabled ? 'left-[18px]' : 'left-0.5'}`} />
+              </button>
+            </div>
+          </div>
+
+          {settings.enabled && (
+            <div className="flex items-center gap-5 mb-3 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-zinc-600">Achat ≥</span>
+                <input type="range" min="50" max="90" value={settings.buyThreshold} onChange={(e) => updateSetting('buyThreshold', parseInt(e.target.value))} className="w-16 accent-emerald-500 h-1" />
+                <span className="font-mono text-emerald-400 font-bold w-4">{settings.buyThreshold}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-zinc-600">Prudence ≤</span>
+                <input type="range" min="10" max="50" value={settings.sellThreshold} onChange={(e) => updateSetting('sellThreshold', parseInt(e.target.value))} className="w-16 accent-red-500 h-1" />
+                <span className="font-mono text-red-400 font-bold w-4">{settings.sellThreshold}</span>
+              </div>
+            </div>
+          )}
+
+          {alertHistory.length > 0 ? (
+            <div className="space-y-0 max-h-[200px] overflow-y-auto rounded-xl border border-white/[0.04] bg-white/[0.01]">
+              {alertHistory.slice(0, 30).map((a, i) => {
+                const isPhase = a.type === 'phase_up' || a.type === 'phase_down';
+                const isPositive = a.type === 'buy' || a.type === 'phase_up';
+                return (
+                  <div key={i} className="flex items-center justify-between py-2 px-4 border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>{isPositive ? '↗' : '↘'}</span>
+                      {isPhase ? (
+                        <>
+                          <span className="text-xs font-semibold text-zinc-200">{a.sym}</span>
+                          <span className="text-[10px] text-zinc-600">{a.from} → </span>
+                          <span className="text-[10px] font-semibold" style={{ color: isPositive ? '#34d399' : '#f87171' }}>{a.to}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xs text-zinc-400">{a.type === 'buy' ? "Achat" : 'Prudence'}</span>
+                          <span className="text-xs font-mono font-bold" style={{ color: isPositive ? '#34d399' : '#f87171' }}>{a.score}</span>
+                        </>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-zinc-700 font-mono">
+                      {new Date(a.ts).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} {new Date(a.ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-16 rounded-xl border border-white/[0.04] bg-white/[0.01]">
+              <p className="text-zinc-700 text-xs">Aucune notification</p>
+            </div>
+          )}
+        </div>
+
+        {/* Telegram bot config */}
+        <div className="rounded-2xl border border-white/[0.06] p-5" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <svg className="w-4.5 h-4.5 text-[#26A5E4]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+              <h3 className="text-sm font-semibold text-white">Telegram Bot</h3>
+            </div>
+            <button
+              onClick={() => updateTgConfig('enabled', !tgConfig.enabled)}
+              className={`relative w-9 h-5 rounded-full transition-all duration-300 ${tgConfig.enabled ? 'bg-[#26A5E4]/80' : 'bg-white/[0.06]'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${tgConfig.enabled ? 'left-[18px]' : 'left-0.5'}`} />
+            </button>
+          </div>
+
+          {showTgConfig || tgConfig.enabled ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1 block">Bot Token</label>
+                <input
+                  type="password"
+                  value={tgConfig.botToken}
+                  onChange={(e) => updateTgConfig('botToken', e.target.value)}
+                  placeholder="123456:ABC-DEF..."
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-white/[0.12] placeholder-zinc-700 font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1 block">Chat ID</label>
+                <input
+                  type="text"
+                  value={tgConfig.chatId}
+                  onChange={(e) => updateTgConfig('chatId', e.target.value)}
+                  placeholder="-100123456789"
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-white/[0.12] placeholder-zinc-700 font-mono"
+                />
+              </div>
+              <button
+                onClick={handleTgTest}
+                disabled={!tgConfig.botToken || !tgConfig.chatId}
+                className="w-full py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-[#26A5E4]/10 border border-[#26A5E4]/20 text-[#26A5E4] hover:bg-[#26A5E4]/20 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {tgTestResult === 'loading' ? 'Envoi...' : tgTestResult === 'ok' ? 'Envoye !' : tgTestResult === 'error' ? 'Erreur — verifiez les infos' : 'Tester le bot'}
+              </button>
+              <p className="text-[10px] text-zinc-700 leading-relaxed">
+                Creez un bot via <span className="text-zinc-500">@BotFather</span> sur Telegram, recuperez le token et le Chat ID de votre canal/groupe.
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-16">
+              <button onClick={() => setShowTgConfig(true)} className="text-xs text-zinc-600 hover:text-[#26A5E4] transition-colors">
+                Configurer le bot Telegram
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Scanner */}
@@ -383,91 +532,6 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Alertes — 2 colonnes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Config alertes */}
-        <div className="rounded-3xl border border-white/[0.06] p-8" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-white tracking-tight">Alertes</h3>
-            <button
-              onClick={() => updateSetting('enabled', !settings.enabled)}
-              className={`relative w-12 h-7 rounded-full transition-all duration-300 ${
-                settings.enabled ? 'bg-emerald-500/80' : 'bg-white/[0.06]'
-              }`}
-            >
-              <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-300 ${
-                settings.enabled ? 'left-[26px]' : 'left-1'
-              }`} />
-            </button>
-          </div>
-
-          {settings.enabled && (
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between text-sm mb-3">
-                  <span className="text-zinc-500">Seuil zone d'achat</span>
-                  <span className="font-mono text-emerald-400 font-bold text-base">{settings.buyThreshold}</span>
-                </div>
-                <input type="range" min="50" max="90" value={settings.buyThreshold} onChange={(e) => updateSetting('buyThreshold', parseInt(e.target.value))} className="w-full accent-emerald-500 h-1.5" />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-3">
-                  <span className="text-zinc-500">Seuil zone prudence</span>
-                  <span className="font-mono text-red-400 font-bold text-base">{settings.sellThreshold}</span>
-                </div>
-                <input type="range" min="10" max="50" value={settings.sellThreshold} onChange={(e) => updateSetting('sellThreshold', parseInt(e.target.value))} className="w-full accent-red-500 h-1.5" />
-              </div>
-              <button onClick={handleTest} className="flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-all duration-200 mt-2">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                Tester
-                {testResult === 'ok' && <span className="text-emerald-400 font-medium ml-1">OK</span>}
-                {testResult === 'blocked' && <span className="text-red-400 font-medium ml-1">Bloquees</span>}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Historique alertes */}
-        <div className="rounded-3xl border border-white/[0.06] p-8" style={{ background: 'linear-gradient(180deg, rgba(22,22,42,0.6) 0%, rgba(16,16,30,0.8) 100%)' }}>
-          <h3 className="text-lg font-semibold text-white tracking-tight mb-6">Historique alertes</h3>
-          {alertHistory.length > 0 ? (
-            <div className="space-y-1 max-h-[300px] overflow-y-auto">
-              {alertHistory.slice(0, 30).map((a, i) => {
-                const isPhase = a.type === 'phase_up' || a.type === 'phase_down';
-                const isPositive = a.type === 'buy' || a.type === 'phase_up';
-                return (
-                  <div key={i} className="flex items-center justify-between py-3 border-b border-white/[0.03] last:border-0">
-                    <div className="flex items-center gap-3">
-                      <span className={`w-2 h-2 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                      {isPhase ? (
-                        <>
-                          <span className="text-sm font-semibold text-zinc-300">{a.sym}</span>
-                          <span className="text-xs text-zinc-600">{a.from}</span>
-                          <span className="text-xs text-zinc-600">→</span>
-                          <span className="text-xs font-semibold" style={{ color: isPositive ? '#34d399' : '#f87171' }}>{a.to}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-sm text-zinc-400">{a.type === 'buy' ? "Achat" : 'Prudence'}</span>
-                          <span className="text-sm font-mono font-bold" style={{ color: isPositive ? '#34d399' : '#f87171' }}>{a.score}</span>
-                        </>
-                      )}
-                    </div>
-                    <span className="text-xs text-zinc-700 font-mono">
-                      {new Date(a.ts).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-24">
-              <p className="text-zinc-700 text-sm">Aucune alerte pour le moment</p>
-            </div>
-          )}
         </div>
       </div>
 

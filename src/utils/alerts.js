@@ -1,3 +1,5 @@
+import { sendTelegramMessage, formatScoreAlert, formatPhaseAlert } from './telegram';
+
 const ALERTS_KEY = 'csp_alerts';
 const ALERT_SETTINGS_KEY = 'csp_alert_settings';
 const CRYPTO_SIGNALS_KEY = 'csp_crypto_signals';
@@ -61,7 +63,9 @@ export async function checkAndNotify(score, prevScore) {
     const msg = `Zone d'achat detectee ! Score: ${score}/100`;
     sendBrowserNotif('Crypto Sentinel Pro', msg);
     addAlert('buy', score);
-    return { type: 'buy', score, message: msg };
+    const alert = { type: 'buy', score, message: msg };
+    sendTelegramMessage(formatScoreAlert(alert));
+    return alert;
   }
 
   if (score <= sellThreshold && prevScore > sellThreshold) {
@@ -69,7 +73,9 @@ export async function checkAndNotify(score, prevScore) {
     const msg = `Zone de prudence ! Score: ${score}/100`;
     sendBrowserNotif('Crypto Sentinel Pro', msg);
     addAlert('sell', score);
-    return { type: 'sell', score, message: msg };
+    const alert = { type: 'sell', score, message: msg };
+    sendTelegramMessage(formatScoreAlert(alert));
+    return alert;
   }
 
   return null;
@@ -181,6 +187,12 @@ export async function checkCryptoPhaseChanges(cryptos, computeSentiment) {
         `${a.name} passe de ${a.from} a ${a.to}`
       );
     }
+  }
+
+  // Telegram: send all phase changes in one message
+  if (alerts.length > 0) {
+    const lines = alerts.map((a) => formatPhaseAlert(a));
+    sendTelegramMessage(`📊 <b>Changements de phase</b>\n\n${lines.join('\n\n')}`);
   }
 
   return alerts;
