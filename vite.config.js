@@ -7,5 +7,8 @@ export default defineConfig({
   base: './',
   build: {
     outDir: 'docs',
+    rollupOptions: {
+      input: 'index.dev.html',
+    },
   },
 })
