@@ -87,7 +87,6 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: fc }} />
                   <span className="text-xs font-medium text-zinc-300">{ind.name}</span>
-                  <span className="text-[9px] font-mono text-zinc-600">{ind.weight}%</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] font-medium" style={{ color: getSignalColor(interp.signal) }}>{interp.signal}</span>

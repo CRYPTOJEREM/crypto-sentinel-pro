@@ -518,15 +518,14 @@ export default function IndicatorPage({ oppScore, indicators, fgValue, cryptos }
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: fc }} />
-                    <span className="text-sm font-medium text-zinc-300">Facteur {i + 1}</span>
+                    <span className="text-sm font-medium text-zinc-300">{ind.name || `Facteur ${i + 1}`}</span>
                   </div>
                   <span className="text-lg font-bold font-mono" style={{ color: fc }}>{ind.current}</span>
                 </div>
                 <div className="relative h-2 bg-white/[0.04] rounded-full overflow-hidden mb-3">
                   <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, backgroundColor: fc, opacity: 0.6 }} />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-600 font-mono">Poids {ind.weight}%</span>
+                <div className="flex items-center justify-end">
                   <span className="text-xs font-semibold" style={{ color: zoneColor }}>{zone}</span>
                 </div>
               </div>

@@ -233,14 +233,14 @@ export const computeOpportunityIndex = (fgValue, cryptos, btcPrice, btcAth, optW
   const domScore = computeBtcDominanceSignal(btcDom);
 
   const indicators = [
-    { name: 'Fear/Greed Contrarian', current: fgScore, weight: w[0] },
-    { name: 'BTC vs ATH', current: mcScore, weight: w[1] },
-    { name: 'Market Breadth', current: breadthScore, weight: w[2] },
-    { name: 'Volatilité', current: volScore, weight: w[3] },
-    { name: 'Momentum 7j+30j', current: momScore, weight: w[4] },
-    { name: 'RSI(14) Market', current: rsiScore, weight: w[5] },
-    { name: 'Volume Surge', current: volumeScore, weight: w[6] },
-    { name: 'BTC Dominance', current: domScore, weight: w[7] },
+    { name: 'Sentiment', current: fgScore, weight: w[0] },
+    { name: 'Tendance', current: mcScore, weight: w[1] },
+    { name: 'Marché', current: breadthScore, weight: w[2] },
+    { name: 'Stabilité', current: volScore, weight: w[3] },
+    { name: 'Dynamique', current: momScore, weight: w[4] },
+    { name: 'Technique', current: rsiScore, weight: w[5] },
+    { name: 'Activité', current: volumeScore, weight: w[6] },
+    { name: 'Flux', current: domScore, weight: w[7] },
   ];
 
   const totalScore = Math.round(indicators.reduce((sum, ind) => sum + ind.current * (ind.weight / 100), 0));
