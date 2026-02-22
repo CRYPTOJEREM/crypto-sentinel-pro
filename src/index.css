@@ -20,23 +20,132 @@
   ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 }
 
+/* Apple-style spring easing curves */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.92) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes backdropEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 
 @layer utilities {
-  .animate-fadeInUp { animation: fadeInUp 0.4s ease-out both; }
+  /* Spring easing: Apple-like cubic-bezier */
+  .animate-fadeInUp {
+    animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-scaleIn {
+    animation: scaleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-pageEnter {
+    animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-modalEnter {
+    animation: modalEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-backdropEnter {
+    animation: backdropEnter 0.3s ease-out both;
+  }
   .animate-spin { animation: spin 1s linear infinite; }
+  .animate-float { animation: float 3s ease-in-out infinite; }
+
+  /* Scroll reveal: starts hidden, revealed by IntersectionObserver */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Card hover: Apple-style lift with spring */
   .card-hover {
-    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .card-hover:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  /* Button micro-interactions */
+  .btn-apple {
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-apple:hover {
+    transform: scale(1.02);
+  }
+  .btn-apple:active {
+    transform: scale(0.97);
+    transition-duration: 0.1s;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: rgba(22, 22, 42, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .glass-strong {
+    background: rgba(11, 11, 20, 0.85);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .glass-light {
+    background: rgba(22, 22, 42, 0.5);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* Smooth tab indicator */
+  .tab-indicator {
+    transition: left 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }

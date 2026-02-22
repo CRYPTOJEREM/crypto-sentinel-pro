@@ -193,7 +193,7 @@ export default function App() {
       {alertBanner && <AlertBanner alert={alertBanner} onClose={() => setAlertBanner(null)} />}
 
       {activeTab !== 'home' && (
-        <header className="sticky top-0 z-40 bg-[#0b0b14]/95 backdrop-blur-md border-b border-[#2a2a45]">
+        <header className="sticky top-0 z-40 glass-strong border-b border-white/[0.04]">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <Header
               isLive={isLive} time={time} stats={stats} lastUpdate={lastUpdate}
@@ -205,67 +205,69 @@ export default function App() {
       )}
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'home' && (
-          <LandingPage
-            onStart={() => isAuthenticated ? setActiveTab('dashboard') : setShowAuthModal(true)}
-            onPricing={goToPricing}
-            onLogin={() => setShowAuthModal(true)}
-            onAccount={() => setActiveTab('account')}
-            isLoggedIn={isAuthenticated}
-          />
-        )}
+        <div key={activeTab} className="animate-pageEnter">
+          {activeTab === 'home' && (
+            <LandingPage
+              onStart={() => isAuthenticated ? setActiveTab('dashboard') : setShowAuthModal(true)}
+              onPricing={goToPricing}
+              onLogin={() => setShowAuthModal(true)}
+              onAccount={() => setActiveTab('account')}
+              isLoggedIn={isAuthenticated}
+            />
+          )}
 
-        {activeTab === 'dashboard' && (
-          <>
-            {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
+          {activeTab === 'dashboard' && (
+            <>
+              {errors.length > 0 && errors.map((err, i) => <ErrorBanner key={i} message={err} onRetry={() => fetchAll(false)} />)}
 
-            {loading ? (
-              <Loader text="Connexion aux APIs..." />
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                  <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
+              {loading ? (
+                <Loader text="Connexion aux APIs..." />
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                    <FearGreedIndex value={fgVal} history={fgHist} btcHistory={btcHist} />
+                    <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
+                      <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
+                    </BlurOverlay>
+                  </div>
+
                   <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
-                    <OpportunityIndex score={oppData.score} prevScore={prevOppScore} indicators={oppData.indicators} showDetails={showDet} setShowDetails={setShowDet} optResult={optResult} />
+                    <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
+
+                    <div className="flex items-center justify-between mb-4 text-sm">
+                      <span className="text-zinc-400">
+                        <span className="text-white font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
+                      </span>
+                      <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
+                    </div>
+
+                    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+                      {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
+                    </div>
                   </BlurOverlay>
-                </div>
+                </>
+              )}
+            </>
+          )}
 
-                <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
-                  <Filters filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} />
-
-                  <div className="flex items-center justify-between mb-4 text-sm">
-                    <span className="text-zinc-400">
-                      <span className="text-white font-semibold font-mono">{filtered.length}</span> cryptos sur {cryptos.length}
-                    </span>
-                    <span className="text-zinc-500 text-xs">Actualisation toutes les 120s</span>
-                  </div>
-
-                  <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
-                    {filtered.map((c, i) => <CryptoCard key={c.cgId || c.id} crypto={c} rank={c.id} index={i} />)}
-                  </div>
-                </BlurOverlay>
-              </>
-            )}
-          </>
-        )}
-
-        {activeTab === 'indicator' && (
-          <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
-            <IndicatorPage oppScore={oppData.score} indicators={oppData.indicators} fgValue={fgVal} cryptos={cryptos} />
-          </BlurOverlay>
-        )}
-        {activeTab === 'pricing' && <PricingPage userRole={user?.role || null} onLoginClick={() => setShowAuthModal(true)} />}
-        {activeTab === 'updates' && <UpdatesPage />}
-        {activeTab === 'guide' && <GuidePage />}
-        {activeTab === 'account' && user && (
-          <AccountPage
-            user={user}
-            onUpdateUser={setUser}
-            onLogout={handleLogout}
-            onGoAdmin={() => setActiveTab('admin')}
-          />
-        )}
-        {activeTab === 'admin' && user?.role === 'admin' && <AdminPage />}
+          {activeTab === 'indicator' && (
+            <BlurOverlay locked={!hasAccess} isLoggedIn={isAuthenticated} onClickUnlock={() => setShowAuthModal(true)} onClickPricing={goToPricing}>
+              <IndicatorPage oppScore={oppData.score} indicators={oppData.indicators} fgValue={fgVal} cryptos={cryptos} />
+            </BlurOverlay>
+          )}
+          {activeTab === 'pricing' && <PricingPage userRole={user?.role || null} onLoginClick={() => setShowAuthModal(true)} />}
+          {activeTab === 'updates' && <UpdatesPage />}
+          {activeTab === 'guide' && <GuidePage />}
+          {activeTab === 'account' && user && (
+            <AccountPage
+              user={user}
+              onUpdateUser={setUser}
+              onLogout={handleLogout}
+              onGoAdmin={() => setActiveTab('admin')}
+            />
+          )}
+          {activeTab === 'admin' && user?.role === 'admin' && <AdminPage />}
+        </div>
 
         <footer className="mt-12 pt-6 border-t border-[#2a2a45] text-center space-y-2 pb-8">
           <p className="text-sm text-zinc-500">Crypto Sentinel Pro v3.0</p>

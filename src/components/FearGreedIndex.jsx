@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { getFearGreedClass } from '../utils/classifications';
+import useAnimatedValue from '../hooks/useAnimatedValue';
 import Loader from './Loader';
 
 export default function FearGreedIndex({ value, history, btcHistory }) {
   const [range, setRange] = useState('1y');
+  const animValue = useAnimatedValue(value, 1000);
 
   if (!history || history.length === 0)
     return <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-6"><Loader text="Chargement Fear & Greed..." /></div>;
@@ -19,7 +21,7 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
   const filteredBtc = range === '30d' ? (btcHistory || []).slice(-30) : range === '1y' ? (btcHistory || []).slice(-365) : (btcHistory || []);
   const btcMin = filteredBtc.length > 0 ? Math.min(...filteredBtc.map((b) => b.price)) : 0;
   const btcMax = filteredBtc.length > 0 ? Math.max(...filteredBtc.map((b) => b.price)) : 1;
-  const needleAngle = -90 + (value / 100) * 180;
+  const needleAngle = -90 + (animValue / 100) * 180;
 
   const getDateLabels = () => {
     if (filtered.length === 0) return [];
@@ -58,12 +60,12 @@ export default function FearGreedIndex({ value, history, btcHistory }) {
           </defs>
           <path d="M 10 75 A 60 60 0 0 1 130 75" fill="none" stroke="#27272a" strokeWidth="8" strokeLinecap="round" />
           <path d="M 10 75 A 60 60 0 0 1 130 75" fill="none" stroke="url(#fgArc)" strokeWidth="8" strokeLinecap="round" opacity="0.8" />
-          <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '70px 75px', transition: 'transform 1s ease-out' }}>
+          <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '70px 75px', transition: 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)' }}>
             <line x1="70" y1="75" x2="70" y2="22" stroke={c.color} strokeWidth="2" strokeLinecap="round" opacity="0.9" />
             <circle cx="70" cy="75" r="4" fill={c.color} opacity="0.9" />
             <circle cx="70" cy="75" r="2" fill="#18181b" />
           </g>
-          <text x="70" y="66" textAnchor="middle" fill={c.color} fontSize="24" fontWeight="700" fontFamily="'JetBrains Mono', monospace">{value}</text>
+          <text x="70" y="66" textAnchor="middle" fill={c.color} fontSize="24" fontWeight="700" fontFamily="'JetBrains Mono', monospace">{animValue}</text>
         </svg>
         <div>
           <div className="text-base font-semibold" style={{ color: c.color }}>{c.label}</div>

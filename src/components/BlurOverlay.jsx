@@ -11,7 +11,7 @@ export default function BlurOverlay({ locked, isLoggedIn, onClickUnlock, onClick
       <div className="absolute inset-0 flex items-center justify-center">
         <button
           onClick={isFreeUser ? onClickPricing : onClickUnlock}
-          className="bg-[#16162a]/90 border border-[#2a2a45] rounded-2xl px-8 py-5 text-center backdrop-blur-sm hover:border-blue-500/40 transition-all cursor-pointer"
+          className="glass rounded-2xl px-8 py-5 text-center hover:border-blue-500/40 transition-all duration-300 cursor-pointer animate-scaleIn"
         >
           <svg className="w-8 h-8 text-zinc-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isFreeUser ? (
@@ -26,7 +26,7 @@ export default function BlurOverlay({ locked, isLoggedIn, onClickUnlock, onClick
           <p className="text-zinc-400 text-xs mb-3">
             {isFreeUser ? 'Passez à Pro pour débloquer toutes les données' : 'Connectez-vous pour commencer'}
           </p>
-          <span className="inline-block bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-5 py-2 rounded-xl transition-colors">
+          <span className="btn-apple inline-block bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-5 py-2 rounded-xl">
             {isFreeUser ? 'Voir les tarifs' : 'Se connecter'}
           </span>
         </button>

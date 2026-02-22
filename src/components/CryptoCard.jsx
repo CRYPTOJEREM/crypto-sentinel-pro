@@ -2,17 +2,20 @@ import { useState, memo } from 'react';
 import { getSentimentStyle } from '../utils/classifications';
 import { computeSentiment, computeFlow } from '../utils/sentiment';
 import MiniSparkline from './MiniSparkline';
+import useInView from '../hooks/useInView';
 
 const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
   const [exp, setExp] = useState(false);
   const sent = computeSentiment(cr);
   const st = getSentimentStyle(sent);
   const flow = computeFlow(cr);
+  const [ref, isVisible] = useInView();
 
   return (
     <div
-      className="card-hover bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-4 cursor-pointer hover:bg-[#1e1e38] hover:border-[#3d3d5c] animate-fadeInUp overflow-hidden"
-      style={{ animationDelay: `${Math.min(index * 0.02, 0.4)}s` }}
+      ref={ref}
+      className={`card-hover bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl p-4 cursor-pointer hover:bg-[#1e1e38] hover:border-[#3d3d5c] scroll-reveal ${isVisible ? 'is-visible' : ''} overflow-hidden`}
+      style={{ transitionDelay: `${Math.min(index * 30, 300)}ms` }}
       onClick={() => setExp(!exp)}
     >
       <div className="flex items-center justify-between mb-3">
@@ -73,7 +76,7 @@ const CryptoCard = memo(function CryptoCard({ crypto: cr, rank, index }) {
       </div>
 
       {exp && (
-        <div className="mt-3 pt-3 border-t border-[#2a2a45] space-y-2.5 animate-fadeInUp">
+        <div className="mt-3 pt-3 border-t border-[#2a2a45] space-y-2.5 animate-scaleIn">
           <div className="grid grid-cols-3 gap-2 text-center">
             {[{ l: '24H', v: cr.c24 }, { l: '7J', v: cr.c7 }, { l: '30J', v: cr.c30 }].map((x, i) => (
               <div key={i} className="bg-[#111122] border border-[#222238]/70 rounded-xl p-2">

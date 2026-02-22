@@ -1,10 +1,10 @@
 export default function Disclaimer({ onAccept }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-backdropEnter"
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)' }}
     >
-      <div className="bg-[#16162a] border border-[#2a2a45]/80 rounded-2xl max-w-lg w-full p-8 animate-fadeInUp">
+      <div className="glass border-white/[0.08] rounded-2xl max-w-lg w-full p-8 animate-modalEnter">
         <h2 className="text-lg font-semibold text-white mb-1">Avertissement</h2>
         <p className="text-xs text-zinc-500 mb-5">Veuillez lire attentivement avant de continuer</p>
 
@@ -29,7 +29,7 @@ export default function Disclaimer({ onAccept }) {
 
         <button
           onClick={onAccept}
-          className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-blue-600 hover:bg-blue-500 text-white"
+          className="btn-apple w-full py-3 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-500 text-white"
         >
           J'accepte et je continue
         </button>

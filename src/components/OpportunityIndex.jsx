@@ -1,23 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getOppClass } from '../utils/classifications';
 import { getFactorInterpretation, getSignalColor } from '../utils/interpretations';
 import { getOppHistory } from '../utils/oppHistory';
+import useAnimatedValue from '../hooks/useAnimatedValue';
 import AlertSettings from './AlertSettings';
 
 const FACTOR_COLORS = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#a855f7', '#ec4899', '#06b6d4', '#84cc16'];
 
 export default function OpportunityIndex({ score, indicators, showDetails, setShowDetails, optResult }) {
-  const [anim, setAnim] = useState(0);
+  const animScore = useAnimatedValue(score, 1200);
   const [expandedFactor, setExpandedFactor] = useState(null);
   const [showAlerts, setShowAlerts] = useState(false);
   const [histRange, setHistRange] = useState('30d');
 
-  useEffect(() => {
-    setTimeout(() => setAnim(score), 100);
-  }, [score]);
-
-  const c = getOppClass(anim);
-  const needleAngle = -90 + (anim / 100) * 180;
+  const c = getOppClass(animScore);
+  const needleAngle = -90 + (animScore / 100) * 180;
 
   const oppHistory = getOppHistory();
   const filteredHist = histRange === '7d'
@@ -66,12 +63,12 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
           </defs>
           <path d="M 10 75 A 60 60 0 0 1 130 75" fill="none" stroke="#27272a" strokeWidth="8" strokeLinecap="round" />
           <path d="M 10 75 A 60 60 0 0 1 130 75" fill="none" stroke="url(#oppG)" strokeWidth="8" strokeLinecap="round" opacity="0.8" />
-          <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '70px 75px', transition: 'transform 1.2s ease-out' }}>
+          <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '70px 75px', transition: 'transform 1.4s cubic-bezier(0.22, 1, 0.36, 1)' }}>
             <line x1="70" y1="75" x2="70" y2="22" stroke={c.color} strokeWidth="2" strokeLinecap="round" opacity="0.9" />
             <circle cx="70" cy="75" r="4" fill={c.color} opacity="0.9" />
             <circle cx="70" cy="75" r="2" fill="#18181b" />
           </g>
-          <text x="70" y="66" textAnchor="middle" fill={c.color} fontSize="24" fontWeight="700" fontFamily="'JetBrains Mono', monospace">{Math.round(anim)}</text>
+          <text x="70" y="66" textAnchor="middle" fill={c.color} fontSize="24" fontWeight="700" fontFamily="'JetBrains Mono', monospace">{animScore}</text>
         </svg>
         <div>
           <div className="text-base font-semibold" style={{ color: c.color }}>{c.label}</div>
@@ -101,7 +98,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
                 <div className="absolute h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${ind.current}%`, backgroundColor: fc, opacity: 0.8 }} />
               </div>
               {isExpanded && (
-                <div className="mt-2 pt-1.5 border-t border-[#222238] animate-fadeInUp">
+                <div className="mt-2 pt-1.5 border-t border-[#222238] animate-scaleIn">
                   <p className="text-[11px] text-zinc-500 leading-relaxed">{interp.text}</p>
                 </div>
               )}
@@ -155,7 +152,7 @@ export default function OpportunityIndex({ score, indicators, showDetails, setSh
       {showAlerts && <AlertSettings />}
 
       {showDetails && (
-        <div className="mt-4 pt-4 border-t border-[#222238] animate-fadeInUp">
+        <div className="mt-4 pt-4 border-t border-[#222238] animate-scaleIn">
           <h3 className="text-xs font-semibold text-zinc-400 mb-3">Comment lire le score</h3>
           <div className="grid grid-cols-1 gap-2">
             {[

@@ -29,8 +29,8 @@ export default function AuthModal({ onClose, onAuth }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
-      <div className="bg-[#16162a] border border-[#2a2a45] rounded-2xl max-w-sm w-full p-6 animate-fadeInUp" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-backdropEnter" style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} onClick={onClose}>
+      <div className="glass border-white/[0.08] rounded-2xl max-w-sm w-full p-6 animate-modalEnter" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-white">
             {mode === 'login' ? 'Connexion' : 'Créer un compte'}
@@ -109,7 +109,7 @@ export default function AuthModal({ onClose, onAuth }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl font-semibold text-sm transition-all bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+            className="btn-apple w-full py-2.5 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
           >
             {loading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : "S'inscrire"}
           </button>
